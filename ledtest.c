@@ -49,9 +49,6 @@
 static int LOCAL_exampleInit ( );
 static unsigned short LOCAL_examplePassed ( unsigned short pruNum );
 
-static void *pruDataMem;
-static unsigned int *pruDataMem_int;
-static unsigned char *pruDataMem_byte;
 
 /******************************************************************************
 * Local Variable Definitions                                                  *
@@ -67,10 +64,10 @@ static unsigned char *pruDataMem_byte;
 * Global Variable Definitions                                                 *
 ******************************************************************************/
 
-static int mem_fd;
-static void *ddrMem, *sharedMem;
+static void *pruDataMem;
+static unsigned int *pruDataMem_int;
+static unsigned char *pruDataMem_byte;
 
-static unsigned int *sharedMem_int;
 
 /******************************************************************************
 * Global Function Definitions                                                 *
@@ -123,8 +120,6 @@ int main (void)
     /* Disable PRU and close memory mapping*/
     prussdrv_pru_disable(PRU_NUM); 
     prussdrv_exit ();
-    munmap(ddrMem, 0x0FFFFFFF);
-    close(mem_fd);
 
     return(0);
 }
@@ -137,29 +132,6 @@ static int LOCAL_exampleInit (  )
 {
     void *DDR_regaddr1, *DDR_regaddr2, *DDR_regaddr3;	
     
-    /* open the device */
-    mem_fd = open("/dev/mem", O_RDWR);
-    if (mem_fd < 0) {
-        printf("Failed to open /dev/mem (%s)\n", strerror(errno));
-        return -1;
-    }	
-
-    /* map the DDR memory */
-    ddrMem = mmap(0, 0x0FFFFFFF, PROT_WRITE | PROT_READ, MAP_SHARED, mem_fd, DDR_BASEADDR);
-    if (ddrMem == NULL) {
-        printf("Failed to map the device (%s)\n", strerror(errno));
-        close(mem_fd);
-        return -1;
-    }
-    
-    /* Store Addends in DDR memory location */
-    DDR_regaddr1 = ddrMem + OFFSET_DDR;
-    DDR_regaddr2 = ddrMem + OFFSET_DDR + 0x00000004;
-    DDR_regaddr3 = ddrMem + OFFSET_DDR + 0x00000008;
-
-    *(unsigned long*) DDR_regaddr1 = ADDEND1;
-    *(unsigned long*) DDR_regaddr2 = ADDEND2;
-    *(unsigned long*) DDR_regaddr3 = ADDEND3;
 
     //Initialize pointer to PRU data memory
     if (PRU_NUM == 0)
@@ -187,15 +159,7 @@ static unsigned short LOCAL_examplePassed ( unsigned short pruNum )
 {
     unsigned int result_0, result_1, result_2;
 
-     /* Allocate Shared PRU memory. */
-    prussdrv_map_prumem(PRUSS0_SHARED_DATARAM, &sharedMem);
-    sharedMem_int = (unsigned int*) sharedMem;
-
-    result_0 = sharedMem_int[OFFSET_SHAREDRAM];
-    result_1 = sharedMem_int[OFFSET_SHAREDRAM + 1];
-    result_2 = sharedMem_int[OFFSET_SHAREDRAM + 2];
-    printf("0=%d, 1=%d, 2=%d\r\n", result_0, result_1, result_2);
     printf("counter=%d\r\n", pruDataMem_int[0]);
-    return ((result_0 == ADDEND1) & (result_1 ==  ADDEND2) & (result_2 ==  ADDEND3)) ;
+    return 1;
 
 }

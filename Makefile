@@ -10,13 +10,13 @@
 #
 
 pru = prucode
-project = mytest
+project = ledtest
 
 LIB_PATH = .
 LIBRARIES = pthread prussdrv
 INCLUDES = -I. ${LIB_PATH}
 
-SOURCES =  mytest.c
+SOURCES =  ledtest.c
 
 EXTRA_DEFINE =
 CCCFLAGS = $(EXTRA_DEFINE)
