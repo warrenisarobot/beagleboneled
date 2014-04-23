@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
 // Driver header file
 #include "prussdrv.h"
@@ -40,9 +41,9 @@
 
 #define PRUSS0_SHARED_DATARAM    4
 
-#define PRU_INTERRUPT_1  17
-
-#define LED_COUNT        100
+//#define PRU_INTERRUPT_1  21
+#define PRU_INTERRUPT_1  22
+#define LED_COUNT        300
 
 /******************************************************************************
 * Local Typedef Declarations                                                  *
@@ -79,31 +80,46 @@ static unsigned char *pruDataMem_byte;
 /******************************************************************************
 * Global Function Definitions                                                 *
 ******************************************************************************/
-int InitPRU() {
+int InitPRU(int pruNum){
     unsigned int ret;
     tpruss_intc_initdata pruss_intc_initdata = PRUSS_INTC_INITDATA;
+    void *DDR_regaddr1, *DDR_regaddr2, *DDR_regaddr3;
+    int i=0;
     
     printf("\nINFO: Starting %s example.\r\n", "PRU_memAccess_DDR_PRUsharedRAM");
     /* Initialize the PRU */
-    prussdrv_init ();		
+    prussdrv_init();	
     
     /* Open PRU Interrupt */
+    printf("\nOpening PRU");
     ret = prussdrv_open(PRU_EVTOUT_0);
     if (ret)
     {
         printf("prussdrv_open open failed\n");
         return (ret);
     }
-    
+    printf("\nInitializing interrupts");
     /* Get the interrupt initialized */
     prussdrv_pruintc_init(&pruss_intc_initdata);
 
     /* Initialize example */
-    printf("\tINFO: Initializing example.\r\n");
-    LOCAL_exampleInit(PRU_NUM);
+    //printf("\tINFO: Initializing example.\r\n");
+
+    printf("\nInitializing PRU memory");
+    //Initialize pointer to PRU data memory
+    if (pruNum == 0)
+    {
+      prussdrv_map_prumem (PRUSS0_PRU0_DATARAM, &pruDataMem);
+    }
+    else if (pruNum == 1)
+    {
+      prussdrv_map_prumem (PRUSS0_PRU1_DATARAM, &pruDataMem);
+    }
+    pruDataMem_int = (unsigned int*) pruDataMem;
+    pruDataMem_byte = (unsigned char*) &pruDataMem_int[1];
 
     /* interrupt tests */
-    printf("\tINT: Interrupt channel %d\r\n",  prussdrv_get_event_to_channel_map(17));
+    printf("\tINT: Interrupt event %d on channel %d and host interrupt %d\r\n",  PRU_INTERRUPT_1, prussdrv_get_event_to_channel_map(PRU_INTERRUPT_1), prussdrv_get_event_to_host_map(PRU_INTERRUPT_1));
     
     /* Execute example on PRU */
     printf("\tINFO: Executing example.\r\n");
@@ -114,12 +130,17 @@ int InitPRU() {
 void RGBToPRU(RGB *leds, int length) {
   //ws2812b takes bytes in GRB order
   int i;
+  printf("Copying Memory\r\n");
+  pruDataMem_int[0] = length * 3;  
   for (i=0; i<length; i++) {
     pruDataMem_byte[(i*3)] = (char) leds[i].green;
     pruDataMem_byte[(i*3) + 1] = (char) leds[i].red;
     pruDataMem_byte[(i*3) + 2] = (char) leds[i].blue;
   }
+  printf("Memory count: %d\r\n", pruDataMem_int[0]);
   prussdrv_pru_send_event(PRU_INTERRUPT_1);
+  printf("Done\r\n");
+
 }
 
 void WaitForPRU() {
@@ -136,18 +157,26 @@ int main (void)
   int ret;
   RGB leds[LED_COUNT];
   ChristmasTwinkleMode stuff(leds, LED_COUNT);
-  
-  ret = InitPRU();
+  //SolidMode stuff(leds, LED_COUNT, 5, 5, 5);
+  ret = InitPRU(0);
   if (ret) {
     return(ret);
   }
 
-  for (int i=0; i<1000; i++) {
+
+
+  for (int i=0; i<10000; i++) {
     stuff.cycle();
     RGBToPRU(leds, LED_COUNT);
-    sleep(stuff.delayTime());
+    //sleep(usleep(stuff.delayTime() * 1000));
+    sleep(1);
     WaitForPRU();
   }
+
+
+  stuff.cycle();
+  RGBToPRU(leds, LED_COUNT);
+  WaitForPRU();
 
     /* Check if example passed */
     if ( LOCAL_examplePassed(PRU_NUM) )

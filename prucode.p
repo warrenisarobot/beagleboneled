@@ -15,7 +15,9 @@
 #define GPIO_CLEARDATAOUT 0x190
 #define GPIO_SETDATAOUT 0x194
 
-
+#define regVal r17
+#define CONST_PRUSSINTC C0
+#define SICR_OFFSET 0x24	
 
 //The WS2812b takes bytes in GRB order
 //Bits are sent with the most significant bit first
@@ -46,22 +48,27 @@ START:
 	ST32      r0, r1
 
 	//Load values from external DDR Memory into Registers R0/R1/R2
-	LBCO      r0, CONST_DDR, 0, 12
+	//LBCO      r0, CONST_DDR, 0, 12
 
 	//Store values from read from the DDR memory into PRU shared RAM
-	SBCO      r0, CONST_PRUSHAREDRAM, 0, 12
+	//SBCO      r0, CONST_PRUSHAREDRAM, 0, 12
 
 	// test GP output
+
+INIT_LOOP:
+	WBS       r31, 31
 	LBCO      r0, CONST_PRUDRAM, 0, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data).  This is the lED count
 	MOV	  r1, 4
-
-	// Send notification to Host for program completion
+	LDI	      r15.w2,	0x0000
+	LDI	      r15.w0,	ARM_PRU1_INTERRUPT
+	SBCO      r15,	CONST_PRUSSINTC,	SICR_OFFSET,        4
 
 
 BYTE_LOOP:
 	// wait for notification from host to say we are ready to send the light codes
 	// this is host interrupt 1 (bit 31 on register 31)
-	WBS       r31, 31
+	// Clear the status of the interrupt
+	//WBS       r31, 31
 	// r0 - the number of bytes to process
 	// r1 - the offset to start from for the first byte
 	SUB	r0, r0, 1
@@ -73,12 +80,12 @@ BYTE_LOOP:
 	// Send notification to Host for program completion
 	MOV	r31.b0, PRU0_ARM_INTERRUPT+16
 	// signal that we're done sending light info then wait for next data set
-	JMP	BYTE_LOOP
+	JMP	INIT_LOOP
 
     // Halt the processor
-    MOV		r4, 255
-    LSR		r4, r4, 1
-    SBCO      r4, CONST_PRUDRAM, 0, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data).  This is the lED count	
+    //MOV		r4, 255
+    //LSR		r4, r4, 1
+    SBCO      r1, CONST_PRUDRAM, 0, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data).  This is the lED count	
     HALT
 
 
