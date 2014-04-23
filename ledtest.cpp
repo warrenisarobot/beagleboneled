@@ -168,8 +168,8 @@ int main (void)
   for (int i=0; i<10000; i++) {
     stuff.cycle();
     RGBToPRU(leds, LED_COUNT);
-    //sleep(usleep(stuff.delayTime() * 1000));
-    sleep(1);
+    sleep(usleep(stuff.delayTime() * 1000));
+    //sleep(1);
     WaitForPRU();
   }
 
