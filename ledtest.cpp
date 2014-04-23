@@ -19,7 +19,7 @@
 #include <pruss_intc_mapping.h>	 
 
 // LED manipulation library
-#include "lightmodes.h"
+#include "lightmodes.cpp"
 
 /******************************************************************************
 * Explicit External Declarations                                              *
@@ -39,6 +39,8 @@
 #define OFFSET_SHAREDRAM 2048		//equivalent with 0x00002000
 
 #define PRUSS0_SHARED_DATARAM    4
+
+#define PRU_INTERRUPT_1  17
 
 /******************************************************************************
 * Local Typedef Declarations                                                  *
@@ -75,9 +77,7 @@ static unsigned char *pruDataMem_byte;
 /******************************************************************************
 * Global Function Definitions                                                 *
 ******************************************************************************/
-
-int main (void)
-{
+int InitPRU() {
     unsigned int ret;
     tpruss_intc_initdata pruss_intc_initdata = PRUSS_INTC_INITDATA;
     
@@ -99,16 +99,53 @@ int main (void)
     /* Initialize example */
     printf("\tINFO: Initializing example.\r\n");
     LOCAL_exampleInit(PRU_NUM);
+
+    /* interrupt tests */
+    printf("\tINT: Interrupt channel %d\r\n",  prussdrv_get_event_to_channel_map(17));
     
     /* Execute example on PRU */
     printf("\tINFO: Executing example.\r\n");
     prussdrv_exec_program (PRU_NUM, "./prucode.bin");
+    return (0);
+}
 
-    /* Wait until PRU0 has finished execution */
+void RGBToPRU(RGB *leds, int length) {
+  //ws2812b takes bytes in GRB order
+  int i;
+  for (i=0; i<length; i++) {
+    pruDataMem_byte[(i*3)] = (char) leds[i].green;
+    pruDataMem_byte[(i*3) + 1] = (char) leds[i].red;
+    pruDataMem_byte[(i*3) + 2] = (char) leds[i].blue;
+  }
+  prussdrv_pru_send_event(PRU_INTERRUPT_1);
+}
+
+void WaitForPRU() {
+    /* Wait until PRU0 has finished rendering the lights */
     printf("\tINFO: Waiting for HALT command.\r\n");
     prussdrv_pru_wait_event (PRU_EVTOUT_0);
     printf("\tINFO: PRU completed transfer.\r\n");
     prussdrv_pru_clear_event (PRU_EVTOUT_0, PRU0_ARM_INTERRUPT);
+}
+
+
+int main (void)
+{
+  int ret;
+  RGB leds[300];
+  ChristmasTwinkleMode stuff(leds, 300);
+  
+  ret = InitPRU();
+  if (ret) {
+    return(ret);
+  }
+
+  for (int i=0; i<1000; i++) {
+    stuff.cycle();
+    RGBToPRU(leds, 300);
+    sleep(stuff.delayTime());
+    WaitForPRU();
+  }
 
     /* Check if example passed */
     if ( LOCAL_examplePassed(PRU_NUM) )
@@ -164,7 +201,7 @@ static int LOCAL_exampleInit ( int pruNum )
     pruDataMem_byte[4] = 0;
     pruDataMem_byte[5] = 0;
     */
-    prussdrv_pru_send_event(19);
+    prussdrv_pru_send_event(PRU_INTERRUPT_1);
     return(0);
 }
 
@@ -179,12 +216,4 @@ static unsigned short LOCAL_examplePassed ( unsigned short pruNum )
 
 }
 
-void RGBToPRU(RGB *leds, int length) {
-  //ws2812b takes bytes in GRB order
-  int i;
-  for (i=0; i<length; i++) {
-    pruDataMem_byte[(i*3)] = (char) leds[i].green;
-    pruDataMem_byte[(i*3) + 1] = (char) leds[i].red;
-    pruDataMem_byte[(i*3) + 2] = (char) leds[i].blue;
-  }
-}
+

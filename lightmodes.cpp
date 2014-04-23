@@ -31,7 +31,7 @@ void changeBrightness(RGB *pixelIn, RGB *pixelOut, int steps, int currentStep) {
   pixelOut->blue = pixelIn->blue * intensity_scale;
 }
 
-/*
+
 RGB::RGB() {
   this->red = 0;
   this->green = 0;
@@ -43,7 +43,7 @@ RGB::RGB(int r, int g, int b) {
   this->green = g;
   this->blue = b;
 }
-*/
+
 
 RGB* LightMode::cycle() {};
 int LightMode::delayTime() {};
@@ -569,8 +569,10 @@ LightningMode::LightningMode(RGB *leds, int numberOfLights) : PulseMode(leds, nu
   //PulseMode::PulseMode(*leds, numberOfLights);
   this->state = 0;
   this->counter = 0;
-  this->midIntensity = random(2, 11);
-  this->pulsesLeft = random(3,6);
+  //this->midIntensity = random(2, 11);
+  this->midIntensity = rand() % 9 + 2;
+  //this->pulsesLeft = random(3,6);
+  this->pulsesLeft = random() % 3 + 3;
 }
 
 LightningMode::~LightningMode() {
@@ -587,8 +589,10 @@ RGB *LightningMode::cycle() {
   if (this->state == 3) {
     if (this->pulsesLeft > 0) {
       this->state = 0;
-      this->midIntensity = random(2,11);
-      this->tempDelay = random(1, 10);
+      //this->midIntensity = random(2,11);
+      this->midIntensity = rand() % 9 + 2;
+      //this->tempDelay = random(1, 10);
+      this->tempDelay = random() % 9 + 1;
       this->pulsesLeft--;
       //pulse(100, 1, peak, 1, 15, 50, 2);
       //delay(random(1,10));
@@ -601,7 +605,8 @@ RGB *LightningMode::cycle() {
       this->counter = 1;
       this->tempDelay = 10;
     } else {
-      this->counter = random(45, 190);
+      //this->counter = random(45, 190);
+      this->counter = random() % 145 + 45;
       this->state = 4;
     }
   }
@@ -617,8 +622,10 @@ RGB *LightningMode::cycle() {
     } else {
       this->state = 0;
       this->counter = 0;
-      this->midIntensity = random(2, 11);
-      this->pulsesLeft = random(3,6);
+      //this->midIntensity = random(2, 11);
+      this->midIntensity = random() % 9 + 2;
+      //this->pulsesLeft = random(3,6);
+      this->pulsesLeft = random() % 3 + 3;
     }
   }
 }

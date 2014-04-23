@@ -54,11 +54,14 @@ START:
 	// test GP output
 	LBCO      r0, CONST_PRUDRAM, 0, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data).  This is the lED count
 	MOV	  r1, 4
-	WBS       r31, 31
+
 	// Send notification to Host for program completion
 
 
 BYTE_LOOP:
+	// wait for notification from host to say we are ready to send the light codes
+	// this is host interrupt 1 (bit 31 on register 31)
+	WBS       r31, 31
 	// r0 - the number of bytes to process
 	// r1 - the offset to start from for the first byte
 	SUB	r0, r0, 1
@@ -69,6 +72,8 @@ BYTE_LOOP:
 	CLR	r30.t14
 	// Send notification to Host for program completion
 	MOV	r31.b0, PRU0_ARM_INTERRUPT+16
+	// signal that we're done sending light info then wait for next data set
+	JMP	BYTE_LOOP
 
     // Halt the processor
     MOV		r4, 255

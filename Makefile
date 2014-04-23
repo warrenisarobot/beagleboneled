@@ -20,7 +20,7 @@ SOURCES =  ledtest.cpp
 
 EXTRA_DEFINE =
 CCCFLAGS = $(EXTRA_DEFINE)
-CC = gcc
+CC = g++
 CFLAGS = $(EXTRA_DEFINE)
 PASM = pasm
 
