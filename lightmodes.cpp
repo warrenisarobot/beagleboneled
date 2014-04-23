@@ -1,10 +1,8 @@
 #include "lightmodes.h"
 #include <stdlib.h>
-#include <arduino.h>
-#include <FastLED.h>
 
 
-void changeBrightness(CRGB *pixelIn, CRGB *pixelOut, int steps, int currentStep) {
+void changeBrightness(RGB *pixelIn, RGB *pixelOut, int steps, int currentStep) {
   int scaleMe;
   int difference;
   if (currentStep > 0) {
@@ -47,17 +45,17 @@ RGB::RGB(int r, int g, int b) {
 }
 */
 
-CRGB* LightMode::cycle() {};
+RGB* LightMode::cycle() {};
 int LightMode::delayTime() {};
 LightMode::~LightMode() {};
 
 
-TestMode::TestMode(CRGB *leds, int numberOfLights) {
+TestMode::TestMode(RGB *leds, int numberOfLights) {
   this->lights = leds;
   this->numberOfLights = numberOfLights;
 };
 
-CRGB* TestMode::cycle() {
+RGB* TestMode::cycle() {
   for (int i=0;i<this->numberOfLights;i++) {
     this->lights[i].red = rand() % 250;
     this->lights[i].green = rand() % 250;
@@ -75,7 +73,7 @@ TestMode::~TestMode() {
 };
 
 
-SolidMode::SolidMode(CRGB *leds, int numberOfLights, int red, int green, int blue) {
+SolidMode::SolidMode(RGB *leds, int numberOfLights, int red, int green, int blue) {
   this->lights = leds;
   this->numberOfLights = numberOfLights;
   this->color.red = red;
@@ -83,7 +81,7 @@ SolidMode::SolidMode(CRGB *leds, int numberOfLights, int red, int green, int blu
   this->color.blue = blue;
 };
 
-CRGB* SolidMode::cycle() {
+RGB* SolidMode::cycle() {
   for (int i=0;i<this->numberOfLights;i++) {
     this->lights[i].red = this->color.red;
     this->lights[i].green = this->color.green;
@@ -100,13 +98,13 @@ SolidMode::~SolidMode() {
   //delete this->lights;
 };
 
-SolidAlternateMode::SolidAlternateMode(CRGB *leds, int numberOfLights, int red, int green, int blue, int red2, int green2, int blue2) : SolidMode(leds, numberOfLights, red, green, blue) {
+SolidAlternateMode::SolidAlternateMode(RGB *leds, int numberOfLights, int red, int green, int blue, int red2, int green2, int blue2) : SolidMode(leds, numberOfLights, red, green, blue) {
   this->color2.red = red2;
   this->color2.green = green2;
   this->color2.blue = blue2;
 };
 
-CRGB* SolidAlternateMode::cycle() {
+RGB* SolidAlternateMode::cycle() {
   for (int i=0;i<this->numberOfLights;i++) {
     if (i % 2 == 1) {
       this->lights[i].red = this->color.red;
@@ -122,7 +120,7 @@ CRGB* SolidAlternateMode::cycle() {
 };
 
 
-GroupMode::GroupMode(CRGB *leds, int numberOfLights, int red, int green, int blue, int on, int off) {
+GroupMode::GroupMode(RGB *leds, int numberOfLights, int red, int green, int blue, int on, int off) {
   this->lights = leds;
   this->numberOfLights = numberOfLights;
   this->color.red = red;
@@ -132,7 +130,7 @@ GroupMode::GroupMode(CRGB *leds, int numberOfLights, int red, int green, int blu
   this->off = off;
 };
 
-CRGB* GroupMode::cycle() {
+RGB* GroupMode::cycle() {
   int onCount = 1;
   int offCount = 0;
   for (int i=0;i<this->numberOfLights;i++) {
@@ -166,10 +164,10 @@ GroupMode::~GroupMode() {
 };
 
 
-TwinkleMode::TwinkleMode(CRGB *leds, int numberOfLights) {
+TwinkleMode::TwinkleMode(RGB *leds, int numberOfLights) {
   this->numberOfLights = numberOfLights;
   this->lights = leds;
-  this->originalLights = new CRGB[numberOfLights];
+  this->originalLights = new RGB[numberOfLights];
   //state of 0 means use original
   //1-10 means increasing for twinkle
   //11-20 means decreasing to original
@@ -185,7 +183,7 @@ TwinkleMode::~TwinkleMode() {
   delete this->originalLights;
 }
 
-CRGB* TwinkleMode::cycle() {
+RGB* TwinkleMode::cycle() {
   for (int i=0; i<numberOfLights; i++) {
     if (this->lightState[i] == 0)
       if (rand() % 300 == 1) this->lightState[i] = 1;
@@ -215,7 +213,7 @@ int TwinkleMode::delayTime() {
 }
 
 
-WhiteTwinkleMode::WhiteTwinkleMode(CRGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
+WhiteTwinkleMode::WhiteTwinkleMode(RGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
   //
   this->numberOfLights = numberOfLights;
   for (int i=0; i<numberOfLights; i++) {
@@ -223,14 +221,14 @@ WhiteTwinkleMode::WhiteTwinkleMode(CRGB *leds, int numberOfLights) : TwinkleMode
     this->originalLights[i].green = 10;
     this->originalLights[i].blue = 10;
   }
-  this->twinkleLight = new CRGB(10, 10, 10);
+  this->twinkleLight = new RGB(10, 10, 10);
 };
 
 WhiteTwinkleMode::~WhiteTwinkleMode() {
   delete this->twinkleLight;
 };
 
-ChristmasTwinkleMode::ChristmasTwinkleMode(CRGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
+ChristmasTwinkleMode::ChristmasTwinkleMode(RGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
   //
   this->numberOfLights = numberOfLights;
   for (int i=0; i<numberOfLights; i++) {
@@ -243,8 +241,8 @@ ChristmasTwinkleMode::ChristmasTwinkleMode(CRGB *leds, int numberOfLights) : Twi
     }
     this->originalLights[i].blue = 0;
   }
-  //this->twinkleLight = new CRGB(10, 10, 10);
-  this->twinkleLight = new CRGB;
+  //this->twinkleLight = new RGB(10, 10, 10);
+  this->twinkleLight = new RGB;
   this->twinkleLight->red = 10;
   this->twinkleLight->green = 10;
   this->twinkleLight->blue = 10;
@@ -255,7 +253,7 @@ ChristmasTwinkleMode::~ChristmasTwinkleMode() {
 }
 
 
-RainbowMode::RainbowMode(CRGB *leds, int numberOfLights) {
+RainbowMode::RainbowMode(RGB *leds, int numberOfLights) {
   this->lights = leds;
   this->firstLight.red = 255;
   this->firstLight.green = 0;
@@ -270,9 +268,9 @@ RainbowMode::~RainbowMode() {
   //delete this->lights;
 }
 
-CRGB* RainbowMode::cycle() {
+RGB* RainbowMode::cycle() {
   int state=0;
-  CRGB pixel;
+  RGB pixel;
   pixel.red = this->firstLight.red;
   pixel.green = this->firstLight.green;
   pixel.blue = this->firstLight.blue;
@@ -327,10 +325,10 @@ int RainbowMode::delayTime() {
 };
 
 
-FlickerMode::FlickerMode(CRGB *leds, int numberOfLights) {
+FlickerMode::FlickerMode(RGB *leds, int numberOfLights) {
   this->numberOfLights = numberOfLights;
   this->lights = leds;
-  this->originalLights = new CRGB[numberOfLights];
+  this->originalLights = new RGB[numberOfLights];
   //state of 0 means use original
   //1-10 means increasing for twinkle
   //11-20 means decreasing to original
@@ -346,7 +344,7 @@ FlickerMode::~FlickerMode() {
   delete this->lightState;
 }
 
-CRGB* FlickerMode::cycle() {
+RGB* FlickerMode::cycle() {
   for (int i=0;i<this->numberOfLights;i++) {
     if (this->lightState[i] == 0) {
       if (rand() % 40 == 0) {
@@ -374,7 +372,7 @@ int FlickerMode::delayTime() {
 }
 
 
-CandleMode::CandleMode(CRGB *leds, int numberOfLights) : FlickerMode(leds, numberOfLights) {
+CandleMode::CandleMode(RGB *leds, int numberOfLights) : FlickerMode(leds, numberOfLights) {
   for (int i=0; i<this->numberOfLights; i++) {
     this->originalLights[i].red = 200;
     this->originalLights[i].green = 100;
@@ -386,13 +384,13 @@ CandleMode::~CandleMode() {
 }
 
 
-DropMode::DropMode(CRGB *leds, int numberOfLights) {
+DropMode::DropMode(RGB *leds, int numberOfLights) {
   //position starts at 1 and goes to number of lights + the max drop length
   this->numberOfLights = numberOfLights;
   this->lights = leds;
   this->position = 0;
   this->dropSpeed = 0;
-  this->dropColor = CRGB();
+  this->dropColor = RGB();
   this->colorState = 0;
   for (int i=0;i<numberOfLights;i++) {
     this->lights[i].red = 0;
@@ -405,7 +403,7 @@ DropMode::~DropMode() {
   //delete this->lights;
 }
 
-CRGB *DropMode::cycle() {
+RGB *DropMode::cycle() {
   if (this->position == 0) {
     this->position = 1;
     this->changeDropColor();
@@ -476,7 +474,7 @@ void DropMode::changeDropColor() {
   if (this->colorState > 7) this->colorState = 0;
 }
 
-HalloweenDropMode::HalloweenDropMode(CRGB *lights, int numberOfLights) : DropMode(lights, numberOfLights) {
+HalloweenDropMode::HalloweenDropMode(RGB *lights, int numberOfLights) : DropMode(lights, numberOfLights) {
 }
 
 void HalloweenDropMode::changeDropColor() {
@@ -503,7 +501,7 @@ void HalloweenDropMode::changeDropColor() {
 }
 
 
-PulseMode::PulseMode(CRGB *leds, int numberOfLights, int startIntensity, int midIntensity, int stopIntensity, int startDelay, int midDelay, int stopDelay) {
+PulseMode::PulseMode(RGB *leds, int numberOfLights, int startIntensity, int midIntensity, int stopIntensity, int startDelay, int midDelay, int stopDelay) {
   this->lights = leds;
   this->numberOfLights = numberOfLights;
   this->startIntensity = startIntensity;
@@ -521,7 +519,7 @@ PulseMode::PulseMode(CRGB *leds, int numberOfLights, int startIntensity, int mid
 PulseMode::~PulseMode() {
 }
 
-CRGB* PulseMode::cycle() {
+RGB* PulseMode::cycle() {
   int colorStep = 255 / 10;
   if (this->state == 0) {
     if (this->counter <= this->midIntensity) {
@@ -567,7 +565,7 @@ int PulseMode::delayTime() {
   return this->tempDelay;
 }
 
-LightningMode::LightningMode(CRGB *leds, int numberOfLights) : PulseMode(leds, numberOfLights, 1, 0, 1, 15, 50, 2) {
+LightningMode::LightningMode(RGB *leds, int numberOfLights) : PulseMode(leds, numberOfLights, 1, 0, 1, 15, 50, 2) {
   //PulseMode::PulseMode(*leds, numberOfLights);
   this->state = 0;
   this->counter = 0;
@@ -579,7 +577,7 @@ LightningMode::~LightningMode() {
   //delete this->lights;
 }
 
-CRGB *LightningMode::cycle() {
+RGB *LightningMode::cycle() {
   //state 1 = clearing out lights
   //      2 = increasing brightness
   //      3 = decreasing brightness

@@ -1,6 +1,6 @@
-#include <FastLED.h>
+//#include <FastLED.h>
 
-/*
+
 class RGB {
  public:
   int red;
@@ -9,13 +9,13 @@ class RGB {
   RGB();
   RGB(int r, int g, int b);
 };
-*/
+
 
 class LightMode {
  public:
-  CRGB *lights;
+  RGB *lights;
   int numberOfLights;
-  virtual CRGB* cycle();
+  virtual RGB* cycle();
   virtual int delayTime();
   virtual ~LightMode();
 };
@@ -23,131 +23,131 @@ class LightMode {
 
 class TestMode: public LightMode {
  public:
-  CRGB* lights;
+  RGB* lights;
   int numberOfLights;
-  CRGB* cycle();
+  RGB* cycle();
   int delayTime();
-  TestMode(CRGB *leds, int numberOfLights);
+  TestMode(RGB *leds, int numberOfLights);
   ~TestMode();
 };
 
 
 class SolidMode: public LightMode {
  public:
-  CRGB* lights;
-  CRGB color;
+  RGB* lights;
+  RGB color;
   int numberOfLights;
-  CRGB* cycle();
+  RGB* cycle();
   int delayTime();
-  SolidMode(CRGB *leds, int numberOfLights, int red, int green, int blue);
+  SolidMode(RGB *leds, int numberOfLights, int red, int green, int blue);
   ~SolidMode();
 };
 
 class SolidAlternateMode: public SolidMode {
  public:
-  CRGB color2;
-  CRGB* cycle();
-  SolidAlternateMode(CRGB *leds, int numberOfLights, int red, int green, int blue, int red2, int green2, int blue2);
+  RGB color2;
+  RGB* cycle();
+  SolidAlternateMode(RGB *leds, int numberOfLights, int red, int green, int blue, int red2, int green2, int blue2);
 };
 
 class GroupMode: public LightMode {
  public:
-  CRGB* lights;
-  CRGB color;
+  RGB* lights;
+  RGB color;
   int numberOfLights;
   int on;
   int off;
-  CRGB* cycle();
+  RGB* cycle();
   int delayTime();
-  GroupMode(CRGB *leds, int numberOfLights, int red, int green, int blue, int on, int off);
+  GroupMode(RGB *leds, int numberOfLights, int red, int green, int blue, int on, int off);
   ~GroupMode();
 };
 
 
 class TwinkleMode: public LightMode {
  public:
-  CRGB* originalLights;
+  RGB* originalLights;
   int* lightState;
-  CRGB* twinkleLight;
-  TwinkleMode(CRGB *leds, int numberOfLights);
+  RGB* twinkleLight;
+  TwinkleMode(RGB *leds, int numberOfLights);
   //TwinkleMode();
   ~TwinkleMode();
   int delayTime();
-  CRGB* cycle();
+  RGB* cycle();
 };
 
 
 class WhiteTwinkleMode: public TwinkleMode {
  public:
-  WhiteTwinkleMode(CRGB *leds, int numberOfLights);
+  WhiteTwinkleMode(RGB *leds, int numberOfLights);
   ~WhiteTwinkleMode();
 };
 
 
 class ChristmasTwinkleMode: public TwinkleMode {
  public:
-  ChristmasTwinkleMode(CRGB *leds, int numberOfLights);
+  ChristmasTwinkleMode(RGB *leds, int numberOfLights);
   ~ChristmasTwinkleMode();
 };
 
 
 class RainbowMode: public LightMode {
  public:
-  CRGB* lights;
-  CRGB firstLight;
+  RGB* lights;
+  RGB firstLight;
   int lastState;
   int maxBrightness;
   int lightIncrease;
-  RainbowMode(CRGB *leds, int numberOfLights);
+  RainbowMode(RGB *leds, int numberOfLights);
   int delayTime();
-  CRGB* cycle();
+  RGB* cycle();
   ~RainbowMode();
 };
 
 
 class FlickerMode: public LightMode {
  public:
-  CRGB* originalLights;
+  RGB* originalLights;
   int* lightState;
-  FlickerMode(CRGB *leds, int numberOfLights);
+  FlickerMode(RGB *leds, int numberOfLights);
   ~FlickerMode();
-  CRGB* cycle();
+  RGB* cycle();
   int delayTime();
 };
 
 
 class CandleMode: public FlickerMode {
  public:
-  CandleMode(CRGB *leds, int numberOfLights);
+  CandleMode(RGB *leds, int numberOfLights);
   ~CandleMode();
 };
 
 
 class DropMode: public LightMode {
  public:
-  DropMode(CRGB *leds, int numberOfLights);
+  DropMode(RGB *leds, int numberOfLights);
   ~DropMode();
-  CRGB* cycle();
+  RGB* cycle();
   int delayTime();
   int position;
   int dropSpeed;
   int colorState;
-  CRGB dropColor;
+  RGB dropColor;
   virtual void changeDropColor();
 };
 
 class HalloweenDropMode: public DropMode {
  public:
-  HalloweenDropMode(CRGB *leds, int numberOfLights);
+  HalloweenDropMode(RGB *leds, int numberOfLights);
   void changeDropColor();
 };
 
 class PulseMode: public LightMode {
  public:
-  PulseMode(CRGB *leds, int numberOfLights, int startIntensity, int midIntensity, int stopIntensity, int startDelay, int midDelay, int stopDelay);
+  PulseMode(RGB *leds, int numberOfLights, int startIntensity, int midIntensity, int stopIntensity, int startDelay, int midDelay, int stopDelay);
   ~PulseMode();
-  CRGB *lights;
-  CRGB* cycle();
+  RGB *lights;
+  RGB* cycle();
   int delayTime();
   int state;
   int counter;
@@ -163,8 +163,8 @@ class PulseMode: public LightMode {
 
 class LightningMode: public PulseMode {
  public:
-  LightningMode(CRGB *leds, int numberOfLights);
+  LightningMode(RGB *leds, int numberOfLights);
   ~LightningMode();
-  CRGB* cycle();
+  RGB* cycle();
   int pulsesLeft;
 };

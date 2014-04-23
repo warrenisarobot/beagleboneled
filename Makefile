@@ -16,7 +16,7 @@ LIB_PATH = .
 LIBRARIES = pthread prussdrv
 INCLUDES = -I. ${LIB_PATH}
 
-SOURCES =  ledtest.c
+SOURCES =  ledtest.cpp
 
 EXTRA_DEFINE =
 CCCFLAGS = $(EXTRA_DEFINE)
@@ -29,7 +29,7 @@ pru : $(pru)
 project: $(project)
 
 $(project) : $(project:%=%.c)
-	$(CC) $(CFLAGS) -c -o $@.o $@.c
+	$(CC) $(CFLAGS) -c -o $@.o $@.cpp
 	$(CC) $@.o $(LIB_PATH:%=-L%) $(LIBRARIES:%=-l%) -o $@
 
 clean :

@@ -18,6 +18,9 @@
 #include "prussdrv.h"
 #include <pruss_intc_mapping.h>	 
 
+// LED manipulation library
+#include "lightmodes.h"
+
 /******************************************************************************
 * Explicit External Declarations                                              *
 ******************************************************************************/
@@ -46,7 +49,7 @@
 * Local Function Declarations                                                 *
 ******************************************************************************/
 
-static int LOCAL_exampleInit ( );
+static int LOCAL_exampleInit ( int pruNum);
 static unsigned short LOCAL_examplePassed ( unsigned short pruNum );
 
 
@@ -128,17 +131,17 @@ int main (void)
 * Local Function Definitions                                                 *
 *****************************************************************************/
 
-static int LOCAL_exampleInit (  )
+static int LOCAL_exampleInit ( int pruNum )
 {
     void *DDR_regaddr1, *DDR_regaddr2, *DDR_regaddr3;
     int i=0;
 
     //Initialize pointer to PRU data memory
-    if (PRU_NUM == 0)
+    if (pruNum == 0)
     {
       prussdrv_map_prumem (PRUSS0_PRU0_DATARAM, &pruDataMem);
     }
-    else if (PRU_NUM == 1)
+    else if (pruNum == 1)
     {
       prussdrv_map_prumem (PRUSS0_PRU1_DATARAM, &pruDataMem);
     }
