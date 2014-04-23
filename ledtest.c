@@ -149,14 +149,15 @@ static int LOCAL_exampleInit (  )
     //pruDataMem_int[1] = 0x08;
     //pruDataMem_int[2] = 0x00;
     for (i=0; i < 300; i++ ) {
-      pruDataMem_byte[i*3] = 0;
-      pruDataMem_byte[(i*3) + 1] = 0;
-      pruDataMem_byte[(i*3) + 2] = 0;
+      pruDataMem_byte[i*3] = 128;
+      pruDataMem_byte[(i*3) + 1] = 128;
+      pruDataMem_byte[(i*3) + 2] = 128;
     }
+
+    pruDataMem_byte[0] = 128;
+    pruDataMem_byte[1] = 128;
+    pruDataMem_byte[2] = 128;
     /*
-    pruDataMem_byte[0] = 0;
-    pruDataMem_byte[1] = 0;
-    pruDataMem_byte[2] = 0;
     pruDataMem_byte[3] = 0;
     pruDataMem_byte[4] = 0;
     pruDataMem_byte[5] = 0;
@@ -167,10 +168,13 @@ static int LOCAL_exampleInit (  )
 static unsigned short LOCAL_examplePassed ( unsigned short pruNum )
 {
     unsigned int result_0, result_1, result_2;
+    pruDataMem_byte[0] = 1;
+    pruDataMem_byte[1] = 1024;
+    pruDataMem_byte[2] = 255;
 
     printf("counter=%d\r\n", pruDataMem_int[0]);
-    printf("Array starting  in: %hhu, %hhd, %hhd\r\n",
-	   pruDataMem_byte[0], pruDataMem_byte[1], pruDataMem_byte[2]);
+    printf("Array starting  in: %hhu, %hhu, %hhu\r\n",
+	   pruDataMem_byte[0], pruDataMem_byte[1], 255);
     return 1;
 
 }

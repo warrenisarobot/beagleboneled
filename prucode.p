@@ -54,8 +54,8 @@ START:
 	// test GP output
 	LBCO      r0, CONST_PRUDRAM, 0, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data).  This is the lED count
 	MOV	  r1, 4
+	WBS       r31, 31
 	// Send notification to Host for program completion
-
 
 
 BYTE_LOOP:
@@ -71,10 +71,8 @@ BYTE_LOOP:
 	MOV	r31.b0, PRU0_ARM_INTERRUPT+16
 
     // Halt the processor
-    MOV		r0, 1
-    MOV		r1, 255
-    LSL		r0, r0, 2
-    AND		r0, r0, r1
+    MOV		r4, 255
+    LSR		r4, r4, 1
     SBCO      r4, CONST_PRUDRAM, 0, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data).  This is the lED count	
     HALT
 
@@ -83,7 +81,7 @@ BYTE_LOOP:
 //
 SEND_BITS:
 	MOV	r3, 0	//r3 is bit counter
-	MOV	r5, 255	//The 1 bit AND mask, this will rightt shift as we iterate (sending most-significant bit first)
+	MOV	r5, 128	//The 1 bit AND mask, this will rightt shift as we iterate (sending most-significant bit first)
 	//r29 is used for storig the address of this function on a CALL, but we were
 	//CALLed from above, we want to store this address since it will be overwritten
 	//through our CALLs below

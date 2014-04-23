@@ -28,7 +28,7 @@ all : $(pru) $(project)
 pru : $(pru)
 project: $(project)
 
-$(project) : $(project:%=%.c)
+$(project) : $(project:%=%.cpp)
 	$(CC) $(CFLAGS) -c -o $@.o $@.cpp
 	$(CC) $@.o $(LIB_PATH:%=-L%) $(LIBRARIES:%=-l%) -o $@
 

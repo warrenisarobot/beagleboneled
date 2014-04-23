@@ -1,3 +1,4 @@
+
 /*
  * mytest.c
  */
@@ -164,7 +165,6 @@ static int LOCAL_exampleInit ( int pruNum )
     pruDataMem_byte[4] = 0;
     pruDataMem_byte[5] = 0;
     */
-    prussdrv_pru_send_event(19);
     return(0);
 }
 
