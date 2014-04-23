@@ -173,7 +173,7 @@ static int LOCAL_exampleInit (  )
 
     // Flush the values in the PRU data memory locations
     pruDataMem_int[1] = 0x10;
-    pruDataMem_int[2] = 0x10;
+    pruDataMem_int[2] = 0x00;
 
     return(0);
 }

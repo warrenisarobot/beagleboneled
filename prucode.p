@@ -45,7 +45,8 @@ START:
 	SBCO      r0, CONST_PRUSHAREDRAM, 0, 12
 
 	// test GP output
-	MOV r0, 10 // loop 10 times
+	LBCO      r0, CONST_PRUDRAM, 4, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data)+4 into r4 using constant table
+	//MOV r0, 10 // loop 10 times
 
 
 
