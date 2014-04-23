@@ -17,7 +17,8 @@
 
 
 
-//Goes in GRB order
+//The WS2812b takes bytes in GRB order
+//Bits are sent with the most significant bit first
 
 
 //Use registers r0-r9 for passing params
@@ -79,9 +80,10 @@ BYTE_LOOP:
 
 
 //this expects R2 to have a byte value we are going to traverse the bits of
+//
 SEND_BITS:
 	MOV	r3, 0	//r3 is bit counter
-	MOV	r5, 1	//The 1 bit AND mask, this will left shift as we iterate
+	MOV	r5, 255	//The 1 bit AND mask, this will rightt shift as we iterate (sending most-significant bit first)
 	//r29 is used for storig the address of this function on a CALL, but we were
 	//CALLed from above, we want to store this address since it will be overwritten
 	//through our CALLs below
@@ -99,7 +101,7 @@ SEND_BITS_0:
 	CALL	CODE1
 	//CALL 	BLINKSHORT
 SEND_BITS_DONE:
-	LSL	r5, r5, 1
+	LSR	r5, r5, 1
 	QBNE	SEND_BITS_LOOP, r3, 8
 	MOV	r29, r28
 	RET
