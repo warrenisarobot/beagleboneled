@@ -1,9 +1,11 @@
 // prucode.p
-
+.setcallreg r29.w0
 
 .origin 0
 
 .entrypoint START
+
+
 
 
 #include "prucode.hp"
@@ -14,6 +16,40 @@
 #define GPIO_SETDATAOUT 0x194
 
 
+//0 =  High: 0.4us (400ns) , Low: 0.85us (850ns)
+//Each clock cycle is 5ns
+CODE0:
+	SET	r30.t14
+	MOV	r1, 39 //400ns = 80 clock cycles
+CODE0_LOOP_HIGH:
+	SUB	r1, r1, 1
+	QBNE	CODE0_LOOP_HIGH, r1, 0
+	CLR	r30.t14
+	MOV	r1, 84//850ns = 170 clock cycles
+CODE0_LOOP_LOW:	
+	SUB	r1, r1, 1
+	QBNE	CODE0_LOOP_LOW, r1, 0
+	//leave it at low, we're done now
+	RET
+	
+
+//1 =  High: 0.8us (800ns) , Low: 0.45us (450ns)
+//Each clock cycle is 5ns
+CODE1:
+	SET	r30.t14
+	MOV	r1, 159 //800ns = 160 clock cycles
+CODE1_LOOP_HIGH:
+	SUB	r1, r1, 1
+	QBNE	CODE1_LOOP_HIGH, r1, 0
+	CLR	r30.t14
+	MOV	r1, 89//450ns = 90 clock cycles
+CODE1_LOOP_LOW:	
+	SUB	r1, r1, 1
+	QBNE	CODE1_LOOP_LOW, r1, 0
+	//leave it at low, we're done now
+	RET
+
+	
 
 START:
           // Enable OCP master port
@@ -41,8 +77,10 @@ START:
 	SBCO      r0, CONST_PRUSHAREDRAM, 0, 12
 
 	// test GP output
-	MOV r1, 200000000 // loop 10 times
-	
+	MOV r1, 300 // loop 10 times
+
+
+
 LOOOP:
 	//MOV r2, 1<<21
 	//MOV r3, GPIO1 | GPIO_SETDATAOUT
@@ -58,13 +96,13 @@ LOOOP:
 	//MOV r0, 0x00f00000
 	CLR R30.t14
 
-DEL2:
 	SUB r1, r1, 1
+	//CALL	CODE1	
 	QBNE LOOOP, r1, 0
+	CLR	r30.t14
 
 	// Send notification to Host for program completion
-
-MOV       r31.b0, PRU0_ARM_INTERRUPT+16
+	MOV	r31.b0, PRU0_ARM_INTERRUPT+16
 
     // Halt the processor
     HALT
