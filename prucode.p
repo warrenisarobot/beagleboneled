@@ -50,24 +50,10 @@ START:
 
 
 
-LOOOP:
-	//MOV r2, 1<<21
-	//MOV r3, GPIO1 | GPIO_SETDATAOUT
-	//SBBO r2, r3, 0, 4
-	//MOV r0, 0x00f00000
-	//SET R30.t14
-	
-	//SUB r0, r0, 1
-	//QBNE DEL1, r0, 0
-	//MOV R2, 1<<21
-	//MOV r3, GPIO1 | GPIO_CLEARDATAOUT
-	//SBBO r2, r3, 0, 4
-	//MOV r0, 0x00f00000
-	//CLR R30.t14
-
+BYTE_LOOP:
 	SUB	r0, r0, 1
 	CALL	BLINKSHORT
-	QBNE	LOOOP, r0, 0
+	QBNE	BYTE_LOOP, r0, 0
 	CLR	r30.t14
 
 	// Send notification to Host for program completion
@@ -77,7 +63,27 @@ LOOOP:
     HALT
 
 
+//this expects R2 to have a byte value we are going to traverse the bits of
+SEND_BITS:
+	MOV	r3, 0
+	MOV	r5, 1	//make the 1 bit AND mask
+SEND_BITS_LOOP:
+	ADD	r3, r3, 1	//copy the byte to use on the mask
+	MOV	r4, r2		//put the byte into r2
+	AND	r4, r4, r5	//r5 has the AND mask to use
+	QBNE	SEND_BITS_0, r4, 0
+//This is a non-zero value, meaning the bit is a 1
+	CALL	BLINKLONG
+	JMP	SEND_BITS_DONE
+SEND_BITS_0:
+	CALL	BLINKSHORT
+SEND_BITS_DONE:
+	LSR	r5, r5, 1
+	QBNE	SEND_BITS_LOOP, r3, 8
+	RET
 
+	
+	
 //0 =  High: 0.4us (400ns) , Low: 0.85us (850ns)
 //Each clock cycle is 5ns
 CODE0:
