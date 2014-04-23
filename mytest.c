@@ -51,6 +51,7 @@ static unsigned short LOCAL_examplePassed ( unsigned short pruNum );
 
 static void *pruDataMem;
 static unsigned int *pruDataMem_int;
+static unsigned char *pruDataMem_byte;
 
 /******************************************************************************
 * Local Variable Definitions                                                  *
@@ -170,11 +171,15 @@ static int LOCAL_exampleInit (  )
       prussdrv_map_prumem (PRUSS0_PRU1_DATARAM, &pruDataMem);
     }
     pruDataMem_int = (unsigned int*) pruDataMem;
-
+    pruDataMem_byte = (unsigned char*) &pruDataMem_int[1];
     // Flush the values in the PRU data memory locations
-    pruDataMem_int[1] = 0x08;
+    pruDataMem_int[0] = 0x00;
+    //pruDataMem_int[1] = 0x08;
     pruDataMem_int[2] = 0x00;
-
+    pruDataMem_byte[0] = 8;
+    pruDataMem_byte[1] = 0;
+    pruDataMem_byte[2] = 0;
+    pruDataMem_byte[3] = 0;
     return(0);
 }
 
