@@ -98,12 +98,12 @@ CODE0_LOOP_LOW:
 //Each clock cycle is 5ns
 CODE1:
 	SET	r30.t14
-	MOV	r1, 159 //800ns = 160 clock cycles
+	MOV	r1, 79 //800ns = 160 clock cycles
 CODE1_LOOP_HIGH:
 	SUB	r1, r1, 1
 	QBNE	CODE1_LOOP_HIGH, r1, 0
 	CLR	r30.t14
-	MOV	r1, 89//450ns = 90 clock cycles
+	MOV	r1, 44//450ns = 90 clock cycles
 CODE1_LOOP_LOW:	
 	SUB	r1, r1, 1
 	QBNE	CODE1_LOOP_LOW, r1, 0
