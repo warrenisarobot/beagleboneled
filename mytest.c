@@ -49,6 +49,9 @@
 static int LOCAL_exampleInit ( );
 static unsigned short LOCAL_examplePassed ( unsigned short pruNum );
 
+static void *pruDataMem;
+static unsigned int *pruDataMem_int;
+
 /******************************************************************************
 * Local Variable Definitions                                                  *
 ******************************************************************************/
@@ -132,7 +135,7 @@ int main (void)
 static int LOCAL_exampleInit (  )
 {
     void *DDR_regaddr1, *DDR_regaddr2, *DDR_regaddr3;	
-
+    
     /* open the device */
     mem_fd = open("/dev/mem", O_RDWR);
     if (mem_fd < 0) {
@@ -156,6 +159,21 @@ static int LOCAL_exampleInit (  )
     *(unsigned long*) DDR_regaddr1 = ADDEND1;
     *(unsigned long*) DDR_regaddr2 = ADDEND2;
     *(unsigned long*) DDR_regaddr3 = ADDEND3;
+
+    //Initialize pointer to PRU data memory
+    if (PRU_NUM == 0)
+    {
+      prussdrv_map_prumem (PRUSS0_PRU0_DATARAM, &pruDataMem);
+    }
+    else if (PRU_NUM == 1)
+    {
+      prussdrv_map_prumem (PRUSS0_PRU1_DATARAM, &pruDataMem);
+    }
+    pruDataMem_int = (unsigned int*) pruDataMem;
+
+    // Flush the values in the PRU data memory locations
+    pruDataMem_int[1] = 0x10;
+    pruDataMem_int[2] = 0x10;
 
     return(0);
 }

@@ -45,7 +45,7 @@ START:
 	SBCO      r0, CONST_PRUSHAREDRAM, 0, 12
 
 	// test GP output
-	MOV r0, 7200 // loop 10 times
+	MOV r0, 10 // loop 10 times
 
 
 
@@ -64,9 +64,9 @@ LOOOP:
 	//MOV r0, 0x00f00000
 	//CLR R30.t14
 
-	SUB r0, r0, 1
-	CALL	CODE0
-	QBNE LOOOP, r0, 0
+	SUB	r0, r0, 1
+	CALL	BLINKME
+	QBNE	LOOOP, r0, 0
 	CLR	r30.t14
 
 	// Send notification to Host for program completion
@@ -77,7 +77,7 @@ LOOOP:
 
 
 
-	//0 =  High: 0.4us (400ns) , Low: 0.85us (850ns)
+//0 =  High: 0.4us (400ns) , Low: 0.85us (850ns)
 //Each clock cycle is 5ns
 CODE0:
 	SET	r30.t14
@@ -108,4 +108,18 @@ CODE1_LOOP_LOW:
 	SUB	r1, r1, 1
 	QBNE	CODE1_LOOP_LOW, r1, 0
 	//leave it at low, we're done now
+	RET
+
+
+BLINKME:
+	SET	r30.t14
+	MOV	r1, 25000000
+BLINKME_ON:
+	SUB	r1, r1, 1
+	QBNE	BLINKME_ON, r1, 0
+	CLR	r30.t14
+	MOV	r1, 25000000
+BLINKME_OFF:	
+	SUB	r1, r1, 1
+	QBNE	BLINKME_OFF, r1, 0
 	RET
