@@ -173,10 +173,10 @@ static int LOCAL_exampleInit (  )
     pruDataMem_int = (unsigned int*) pruDataMem;
     pruDataMem_byte = (unsigned char*) &pruDataMem_int[1];
     // Flush the values in the PRU data memory locations
-    pruDataMem_int[0] = 0x00;
+    pruDataMem_int[0] = 0x02;
     //pruDataMem_int[1] = 0x08;
     pruDataMem_int[2] = 0x00;
-    pruDataMem_byte[0] = 8;
+    pruDataMem_byte[0] = 255;
     pruDataMem_byte[1] = 0;
     pruDataMem_byte[2] = 0;
     pruDataMem_byte[3] = 0;
@@ -194,7 +194,8 @@ static unsigned short LOCAL_examplePassed ( unsigned short pruNum )
     result_0 = sharedMem_int[OFFSET_SHAREDRAM];
     result_1 = sharedMem_int[OFFSET_SHAREDRAM + 1];
     result_2 = sharedMem_int[OFFSET_SHAREDRAM + 2];
-    printf("0=%d, 1=%d, 2=%d", result_0, result_1, result_2);
+    printf("0=%d, 1=%d, 2=%d\r\n", result_0, result_1, result_2);
+    printf("counter=%d\r\n", pruDataMem_int[0]);
     return ((result_0 == ADDEND1) & (result_1 ==  ADDEND2) & (result_2 ==  ADDEND3)) ;
 
 }

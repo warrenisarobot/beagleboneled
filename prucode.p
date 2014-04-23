@@ -45,14 +45,18 @@ START:
 	SBCO      r0, CONST_PRUSHAREDRAM, 0, 12
 
 	// test GP output
-	LBCO      r0, CONST_PRUDRAM, 4, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data)+4 into r4 using constant table
-	//MOV r0, 10 // loop 10 times
+	LBCO      r0, CONST_PRUDRAM, 0, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data).  This is the lED count
+	MOV	  r1, 4
 
 
 
 BYTE_LOOP:
+	// r0 - the number of bytes to process
+	// r1 - the offset to start from for the first byte
 	SUB	r0, r0, 1
-	CALL	BLINKSHORT
+	LBCO	r2, CONST_PRUDRAM, r1, 4	//value of current byte in r2
+	CALL	SEND_BITS
+	ADD	r1, r1, 1
 	QBNE	BYTE_LOOP, r0, 0
 	CLR	r30.t14
 
@@ -60,16 +64,25 @@ BYTE_LOOP:
 	MOV	r31.b0, PRU0_ARM_INTERRUPT+16
 
     // Halt the processor
+    MOV		r0, 1
+    MOV		r1, 255
+    LSL		r0, r0, 2
+    AND		r0, r0, r1
+    SBCO      r4, CONST_PRUDRAM, 0, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data).  This is the lED count	
     HALT
 
 
 //this expects R2 to have a byte value we are going to traverse the bits of
 SEND_BITS:
-	MOV	r3, 0
-	MOV	r5, 1	//make the 1 bit AND mask
+	MOV	r3, 0	//r3 is bit counter
+	MOV	r5, 1	//The 1 bit AND mask, this will left shift as we iterate
+	//r29 is used for storig the address of this function on a CALL, but we were
+	//CALLed from above, we want to store this address since it will be overwritten
+	//through our CALLs below
+	MOV	r28, r29
 SEND_BITS_LOOP:
-	ADD	r3, r3, 1	//copy the byte to use on the mask
-	MOV	r4, r2		//put the byte into r2
+	ADD	r3, r3, 1	//increase bit position counter
+	MOV	r4, r2		//copy the byte we're using into r4 - to be masked
 	AND	r4, r4, r5	//r5 has the AND mask to use
 	QBNE	SEND_BITS_0, r4, 0
 //This is a non-zero value, meaning the bit is a 1
@@ -78,8 +91,9 @@ SEND_BITS_LOOP:
 SEND_BITS_0:
 	CALL	BLINKSHORT
 SEND_BITS_DONE:
-	LSR	r5, r5, 1
+	LSL	r5, r5, 1
 	QBNE	SEND_BITS_LOOP, r3, 8
+	MOV	r29, r28
 	RET
 
 	
