@@ -41,27 +41,24 @@ START:
 	SBCO      r0, CONST_PRUSHAREDRAM, 0, 12
 
 	// test GP output
-	MOV r1, 30 // loop 10 times
+	MOV r1, 200000000 // loop 10 times
 	
 LOOOP:
-	MOV r2, 1<<21
-	MOV r3, GPIO1 | GPIO_SETDATAOUT
-	SBBO r2, r3, 0, 4
-	MOV r0, 0x00f00000
+	//MOV r2, 1<<21
+	//MOV r3, GPIO1 | GPIO_SETDATAOUT
+	//SBBO r2, r3, 0, 4
+	//MOV r0, 0x00f00000
 	SET R30.t14
 	
-DEL1:
-	SUB r0, r0, 1
-	QBNE DEL1, r0, 0
-	MOV R2, 1<<21
-	MOV r3, GPIO1 | GPIO_CLEARDATAOUT
-	SBBO r2, r3, 0, 4
-	MOV r0, 0x00f00000
+	//SUB r0, r0, 1
+	//QBNE DEL1, r0, 0
+	//MOV R2, 1<<21
+	//MOV r3, GPIO1 | GPIO_CLEARDATAOUT
+	//SBBO r2, r3, 0, 4
+	//MOV r0, 0x00f00000
 	CLR R30.t14
 
 DEL2:
-	SUB r0, r0, 1
-	QBNE DEL2, r0, 0
 	SUB r1, r1, 1
 	QBNE LOOOP, r1, 0
 
