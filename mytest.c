@@ -171,7 +171,7 @@ static unsigned short LOCAL_examplePassed ( unsigned short pruNum )
     result_0 = sharedMem_int[OFFSET_SHAREDRAM];
     result_1 = sharedMem_int[OFFSET_SHAREDRAM + 1];
     result_2 = sharedMem_int[OFFSET_SHAREDRAM + 2];
-
+    printf("0=%d, 1=%d, 2=%d", result_0, result_1, result_2);
     return ((result_0 == ADDEND1) & (result_1 ==  ADDEND2) & (result_2 ==  ADDEND3)) ;
 
 }
