@@ -130,8 +130,8 @@ int main (void)
 
 static int LOCAL_exampleInit (  )
 {
-    void *DDR_regaddr1, *DDR_regaddr2, *DDR_regaddr3;	
-    
+    void *DDR_regaddr1, *DDR_regaddr2, *DDR_regaddr3;
+    int i=0;
 
     //Initialize pointer to PRU data memory
     if (PRU_NUM == 0)
@@ -145,13 +145,22 @@ static int LOCAL_exampleInit (  )
     pruDataMem_int = (unsigned int*) pruDataMem;
     pruDataMem_byte = (unsigned char*) &pruDataMem_int[1];
     // Flush the values in the PRU data memory locations
-    pruDataMem_int[0] = 0x02;
+    pruDataMem_int[0] = 900;
     //pruDataMem_int[1] = 0x08;
-    pruDataMem_int[2] = 0x00;
-    pruDataMem_byte[0] = 255;
+    //pruDataMem_int[2] = 0x00;
+    for (i=0; i < 300; i++ ) {
+      pruDataMem_byte[i*3] = 0;
+      pruDataMem_byte[(i*3) + 1] = 0;
+      pruDataMem_byte[(i*3) + 2] = 0;
+    }
+    /*
+    pruDataMem_byte[0] = 0;
     pruDataMem_byte[1] = 0;
     pruDataMem_byte[2] = 0;
     pruDataMem_byte[3] = 0;
+    pruDataMem_byte[4] = 0;
+    pruDataMem_byte[5] = 0;
+    */
     return(0);
 }
 
@@ -160,6 +169,8 @@ static unsigned short LOCAL_examplePassed ( unsigned short pruNum )
     unsigned int result_0, result_1, result_2;
 
     printf("counter=%d\r\n", pruDataMem_int[0]);
+    printf("Array starting  in: %hhu, %hhd, %hhd\r\n",
+	   pruDataMem_byte[0], pruDataMem_byte[1], pruDataMem_byte[2]);
     return 1;
 
 }

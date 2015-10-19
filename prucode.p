@@ -17,6 +17,12 @@
 
 
 
+//Goes in GRB order
+
+
+//Use registers r0-r9 for passing params
+//		r10-r19 for local data that can be re-written from other functions
+//		r20-28 for global data that needs to persist within other functions
 	
 
 START:
@@ -47,6 +53,7 @@ START:
 	// test GP output
 	LBCO      r0, CONST_PRUDRAM, 0, 4 //Load 4 bytes from memory location c3(PRU0/1 Local Data).  This is the lED count
 	MOV	  r1, 4
+	// Send notification to Host for program completion
 
 
 
@@ -59,7 +66,6 @@ BYTE_LOOP:
 	ADD	r1, r1, 1
 	QBNE	BYTE_LOOP, r0, 0
 	CLR	r30.t14
-
 	// Send notification to Host for program completion
 	MOV	r31.b0, PRU0_ARM_INTERRUPT+16
 
@@ -86,10 +92,12 @@ SEND_BITS_LOOP:
 	AND	r4, r4, r5	//r5 has the AND mask to use
 	QBNE	SEND_BITS_0, r4, 0
 //This is a non-zero value, meaning the bit is a 1
-	CALL	BLINKLONG
+	CALL	CODE0
+	//CALL	BLINKLONG
 	JMP	SEND_BITS_DONE
 SEND_BITS_0:
-	CALL	BLINKSHORT
+	CALL	CODE1
+	//CALL 	BLINKSHORT
 SEND_BITS_DONE:
 	LSL	r5, r5, 1
 	QBNE	SEND_BITS_LOOP, r3, 8
@@ -102,15 +110,15 @@ SEND_BITS_DONE:
 //Each clock cycle is 5ns
 CODE0:
 	SET	r30.t14
-	MOV	r1, 39 //400ns = 80 clock cycles
+	MOV	r10, 39 //400ns = 80 clock cycles
 CODE0_LOOP_HIGH:
-	SUB	r1, r1, 1
-	QBNE	CODE0_LOOP_HIGH, r1, 0
+	SUB	r10, r10, 1
+	QBNE	CODE0_LOOP_HIGH, r10, 0
 	CLR	r30.t14
-	MOV	r1, 84//850ns = 170 clock cycles
+	MOV	r10, 84//850ns = 170 clock cycles
 CODE0_LOOP_LOW:	
-	SUB	r1, r1, 1
-	QBNE	CODE0_LOOP_LOW, r1, 0
+	SUB	r10, r10, 1
+	QBNE	CODE0_LOOP_LOW, r10, 0
 	//leave it at low, we're done now
 	RET
 	
@@ -119,42 +127,86 @@ CODE0_LOOP_LOW:
 //Each clock cycle is 5ns
 CODE1:
 	SET	r30.t14
-	MOV	r1, 79 //800ns = 160 clock cycles
+	MOV	r10, 79 //800ns = 160 clock cycles
 CODE1_LOOP_HIGH:
-	SUB	r1, r1, 1
-	QBNE	CODE1_LOOP_HIGH, r1, 0
+	SUB	r10, r10, 1
+	QBNE	CODE1_LOOP_HIGH, r10, 0
 	CLR	r30.t14
-	MOV	r1, 44//450ns = 90 clock cycles
+	MOV	r10, 44//450ns = 90 clock cycles
 CODE1_LOOP_LOW:	
-	SUB	r1, r1, 1
-	QBNE	CODE1_LOOP_LOW, r1, 0
+	SUB	r10, r10, 1
+	QBNE	CODE1_LOOP_LOW, r10, 0
 	//leave it at low, we're done now
 	RET
 
 
 BLINKLONG:
 	SET	r30.t14
-	MOV	r1, 25000000
+	MOV	r10, 25000000
 BLINKLONG_ON:
-	SUB	r1, r1, 1
+	SUB	r10, r10, 1
 	QBNE	BLINKLONG_ON, r1, 0
 	CLR	r30.t14
-	MOV	r1, 25000000
+	MOV	r10, 25000000
 BLINKLONG_OFF:	
-	SUB	r1, r1, 1
-	QBNE	BLINKLONG_OFF, r1, 0
+	SUB	r10, r10, 1
+	QBNE	BLINKLONG_OFF, r10, 0
 	RET
 
 
 BLINKSHORT:
 	SET	r30.t14
-	MOV	r1, 5000000
+	MOV	r10, 5000000
 BLINKSHORT_ON:
-	SUB	r1, r1, 1
+	SUB	r10, r10, 1
 	QBNE	BLINKLONG_ON, r1, 0
 	CLR	r30.t14
-	MOV	r1, 25000000
+	MOV	r10, 25000000
 BLINKSHORT_OFF:	
-	SUB	r1, r1, 1
-	QBNE	BLINKLONG_OFF, r1, 0
+	SUB	r10, r10, 1
+	QBNE	BLINKLONG_OFF, r10, 0
 	RET
+
+DELAY:
+	SUB	r7, r7, 1
+	QBNE	DELAY, r7, 0
+	RET
+
+
+TEST:
+	//TEMP
+	MOV	r1, 900
+	MOV	r7, 4
+	CALL	DELAY
+ERASEME:
+	CALL	CODE0
+	MOV	r7, 8
+	CALL 	DELAY
+	CALL	CODE0
+	MOV	r7, 2
+	CALL 	DELAY
+	CALL	CODE0
+	MOV	r7, 2
+	CALL 	DELAY
+	CALL	CODE0
+	MOV	r7, 2
+	CALL 	DELAY
+	CALL	CODE0
+	MOV	r7, 2
+	CALL 	DELAY
+	CALL	CODE0
+	MOV	r7, 2
+	CALL 	DELAY
+	CALL	CODE0
+	MOV	r7, 2
+	CALL 	DELAY
+	CALL	CODE0
+	MOV	r7, 2
+	CALL 	DELAY
+	SUB	r1, r1, 1
+	QBNE	ERASEME, r1, 0
+	//TEMP
+	
+	MOV	r31.b0, PRU0_ARM_INTERRUPT+16
+HALT	
+	
