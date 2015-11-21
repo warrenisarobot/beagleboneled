@@ -77,6 +77,7 @@ BYTE_LOOP:
 	ADD	r1, r1, 1
 	QBNE	BYTE_LOOP, r0, 0
 	CLR	r30.t14
+	CALL	CODERESET
 	// Send notification to Host for program completion
 	MOV	r31.b0, PRU0_ARM_INTERRUPT+16
 	// signal that we're done sending light info then wait for next data set
@@ -148,6 +149,17 @@ CODE1_LOOP_HIGH:
 CODE1_LOOP_LOW:	
 	SUB	r10, r10, 1
 	QBNE	CODE1_LOOP_LOW, r10, 0
+	//leave it at low, we're done now
+	RET
+
+//Reset =  Low 50 us .  this tells the LED to display
+//Each clock cycle is 5ns
+CODERESET:
+	CLR	r30.t14
+	MOV	r10, 5000 //50000ns = 10000 clock cycles
+CODERESET_LOOP_LOW:	
+	SUB	r10, r10, 1
+	QBNE	CODERESET_LOOP_LOW, r10, 0
 	//leave it at low, we're done now
 	RET
 

@@ -43,7 +43,7 @@
 
 //#define PRU_INTERRUPT_1  21
 #define PRU_INTERRUPT_1  22
-#define LED_COUNT        900
+#define LED_COUNT        1500
 
 /******************************************************************************
 * Local Typedef Declarations                                                  *
@@ -155,7 +155,7 @@ void WaitForPRU() {
 int main (void)
 {
   int ret;
-  RGB leds[LED_COUNT];
+  RGB leds[LED_COUNT+500];
   //ChristmasTwinkleMode stuff(leds, LED_COUNT);
   //SolidMode stuff(leds, LED_COUNT, 5, 5, 5);
   RainbowMode stuff(leds, LED_COUNT);
@@ -171,8 +171,8 @@ int main (void)
     RGBToPRU(leds, LED_COUNT);
     //sleep(usleep(stuff.delayTime() * 1000));
     //sleep(1);
-    WaitForPRU();
     usleep(stuff.delayTime() * 1000);    
+    WaitForPRU();
   }
 
 
