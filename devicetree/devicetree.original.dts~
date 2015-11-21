@@ -2225,28 +2225,7 @@
 				linux,phandle = <0xd4>;
 				phandle = <0xd4>;
 			};
-
 		};
-		
-		capemaps {
-			cape@12 {
-			        part-number = "BB-BONE-PRU";
-				version@00A0 {
-					version = "00A0";
-					dtbo = "cape-bone-pru-00A0.dtbo";
-           			};
-			};
-			slot@102 {
-				 ti,cape-override;
-				 compatible = "kernel-command-line", "runtime";
-				 board-name = "Bone-Black-PRU";
-				 version = "00A0";
-				 manufacturer = "na";
-				 part-number = "BB-BONE-PRU";
-     				 };
-		
-		};
-		
 	};
 
 	clk_mcasp0_fixed {

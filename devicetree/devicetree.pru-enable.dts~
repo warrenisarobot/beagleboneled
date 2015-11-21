@@ -1,0 +1,24 @@
+/*
+ * Put these in the corresponding sections for devicetree.original.dts using the same instructions as
+ * in devicetree.no-heartbeat-led.dts
+*/
+			cape@12 {
+			        part-number = "BB-BONE-PRU";
+				version@00A0 {
+					version = "00A0";
+					dtbo = "cape-bone-pru-00A0.dtbo";
+           			};
+			};
+
+
+
+/* This was just under cape@15 */
+			slot@102 {
+				 ti,cape-override;
+				 compatible = "kernel-command-line", "runtime";
+				 board-name = "Bone-Black-PRU";
+				 version = "00A0";
+				 manufacturer = "na";
+				 part-number = "BB-BONE-PRU";
+     				 };
+		};

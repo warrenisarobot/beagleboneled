@@ -4,6 +4,7 @@
     * compile this as a cape-bone-pru-00A0.dtbo file the same as shown in devicetree.no-heartbeat.dts
     * but make sure the use the -@ switch.  Put this file in the firmware folder which should be:
     * /lib/firmware
+    * dtc -I dts -O dtb -o /lib/firmware/cape-bone-pru-00A0.dtbo -@ cape-bone-pru-00A0.dts
     
     */  
     /dts-v1/;  

@@ -1,0 +1,7 @@
+//put this in the gpio-leds section
+		led@2 {
+			label = "beaglebone:green:usr0";
+			gpios = <0x4a 0x15 0x0>;
+			linux,default-trigger = "none";
+			default-state = "off";
+		};
