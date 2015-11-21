@@ -1240,14 +1240,12 @@
 					dtbo = "cape-bone-exptest-00A0.dtbo";
 				};
 			};
-
 			cape@12 {
-				part-number = "BB-BONE-RS232-01";
-
+			        part-number = "BB-BONE-PRU";
 				version@00A0 {
 					version = "00A0";
-					dtbo = "BB-BONE-RS232-00A0.dtbo";
-				};
+					dtbo = "cape-bone-pru-00A0.dtbo";
+           			};
 			};
 
 			cape@13 {
@@ -1284,6 +1282,14 @@
 					version = "00R1";
 					dtbo = "BB-BONE-LOGIBONE-00R1.dtbo";
 				};
+			slot@102 {
+				 ti,cape-override;
+				 compatible = "kernel-command-line", "runtime";
+				 board-name = "Bone-Black-PRU";
+				 version = "00A0";
+				 manufacturer = "na";
+				 part-number = "BB-BONE-PRU";
+     				 };
 			};
 		};
 	};

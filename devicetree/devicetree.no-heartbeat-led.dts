@@ -1,14 +1,14 @@
 //get the current devicetree as a text dts file then put this in the gpio-leds
 // section.  we want the default-trigger to be "none" to stop the heartbeat.
 // Get devicetree as dts:
-// dtc -I dtb -O dts /boot/dtbs/4.1.12-ti-r29/am335x-boneblack.dtb > devicetree.original.dts
+// dtc -I dtb -O dts -o devicetree.original.dts /boot/uboot/dtbs/am335x-boneblack.dtb
 //
 // this the location in debia 8.2, this may be different in other versions
 // Update the device tree, then save it as devicetree.modifid.dts, and convert to database with:
 // dtc -I dts -O dtb  -o /boot/dtbs/4.1.12-ti-r29/am335x-boneblack.dtb  devicetree.modified.dts
-		led@2 {
-			label = "beaglebone:green:usr0";
-			gpios = <0x4a 0x15 0x0>;
-			linux,default-trigger = "none";
-			default-state = "off";
-		};
+			led0 {
+				label = "beaglebone:green:usr0";
+				gpios = <0x5 0x15 0x0>;
+				linux,default-trigger = "none";
+				default-state = "off";
+			};
