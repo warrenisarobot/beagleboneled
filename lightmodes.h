@@ -181,6 +181,7 @@ class MovingColorMode: public LightMode {
   RGB secondColor;
   int firstWidth;
   int secondWidth;
+  int fadeLength;
   int delay;
 };
 

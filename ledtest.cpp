@@ -157,9 +157,9 @@ LightMode *nextLightMode(int cycleNum, RGB *leds, int numberOfLights) {
   LightMode* lm;
   const int num_modes = 3;
   switch (cycleNum % num_modes) {
-  case 0: lm = new ChristmasTwinkleMode(leds, numberOfLights); break;
-  case 1: lm = new CandleMode(leds, numberOfLights); break;
-  case 2: lm = new MovingCandycaneMode(leds, numberOfLights); break;
+  case 0: lm = new MovingCandycaneMode(leds, numberOfLights); break;    
+  case 1: lm = new ChristmasTwinkleMode(leds, numberOfLights); break;
+  case 2: lm = new CandleMode(leds, numberOfLights); break;
   }
   return lm;
 }
@@ -181,7 +181,7 @@ int main (void)
 
 
   
-  while (lightCycle < 10) {
+  while (1) {
     startTime = time(NULL);
     currentMode = nextLightMode(lightCycle, leds, LED_COUNT);
     lightCycle += 1;
@@ -239,14 +239,6 @@ static int LOCAL_exampleInit ( int pruNum )
       pruDataMem_byte[(i*3) + 1] = 0;
       pruDataMem_byte[(i*3) + 2] = 0;
     }
-    /*
-    pruDataMem_byte[0] = 0;
-    pruDataMem_byte[1] = 0;
-    pruDataMem_byte[2] = 0;
-    pruDataMem_byte[3] = 0;
-    pruDataMem_byte[4] = 0;
-    pruDataMem_byte[5] = 0;
-    */
     prussdrv_pru_send_event(PRU_INTERRUPT_1);
     return(0);
 }

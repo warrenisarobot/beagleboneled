@@ -32,16 +32,10 @@ void changeBrightness(RGB *pixelIn, RGB *pixelOut, int steps, int currentStep) {
 }
 
 
-//merge the color1 into color2 with the given resolution using
-//currentStep and steps.  With a currentStep of 0 this just
-//returns color1.  With a currentStep equal to steps this will return
-//color2.  
-void colorMerge(RGB color1, RGB color2, RGB *pixelOut, int steps, int currentStep) {
+//merge the given colors.  With a c
+void colorMerge(RGB *color1, RGB *color2, int steps, int currentStep) {
   float increase = (float) currentStep / (float) steps;
-  float colorIncrease = 0;
-  pixelOut->red = (int) color1.red + ((color2.red - color1.red) * increase);
-  pixelOut->green = (int) color1.green + ((color2.green - color1.green) * increase);
-  pixelOut->blue = (int) color1.blue + ((color2.blue - color1.blue) * increase);
+    
 }
 
 
@@ -653,7 +647,6 @@ MovingColorMode::MovingColorMode(RGB *leds, int numberOfLights, RGB firstColor, 
   this->firstWidth = firstWidth;
   this->secondWidth = secondWidth;
   this->delay = delay;
-  this->fadeLength = fadeLength;
 };
 
 MovingColorMode::~MovingColorMode() {
@@ -669,13 +662,11 @@ RGB *MovingColorMode::cycle() {
       this->leds[i].green = this->firstColor.green;
       this->leds[i].blue = this->firstColor.blue;
     } else if (position <= this->firstWidth + this->fadeLength) {
-      colorMerge(this->firstColor, this->secondColor, &this->leds[i], this->fadeLength + 1, position - this->firstWidth);
-    } else if (position <= this->firstWidth + this->fadeLength + this->secondWidth) {
+    } else if (position <= this->this->firstWidth + this->fadeLength + this->secondWidth) {
       this->leds[i].red = this->secondColor.red;
       this->leds[i].green = this->secondColor.green;
       this->leds[i].blue = this->secondColor.blue;
     } else {
-      colorMerge(this->secondColor, this->firstColor, &this->leds[i], this->fadeLength + 1, position - this->firstWidth - this->secondWidth - this->fadeLength);
     }
   }
   this->state += 1;
@@ -686,7 +677,7 @@ int MovingColorMode::delayTime() {
   return this->delay;
 }
 
-MovingCandycaneMode::MovingCandycaneMode(RGB *leds, int numberOfLights) : MovingColorMode(leds, numberOfLights, RGB(255, 10, 10), 20, RGB(100, 100, 100), 20, 5, 30) {
+MovingCandycaneMode::MovingCandycaneMode(RGB *leds, int numberOfLights) : MovingColorMode(leds, numberOfLights, RGB(255, 10, 10), 50, RGB(100, 100, 100), 50, 5, 40) {
 }
 
 MovingCandycaneMode::~MovingCandycaneMode() {
