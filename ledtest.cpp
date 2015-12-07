@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 // Driver header file
 #include "prussdrv.h"
@@ -44,6 +45,7 @@
 //#define PRU_INTERRUPT_1  21
 #define PRU_INTERRUPT_1  22
 #define LED_COUNT        1500
+#define MODE_LENGTH      30
 
 /******************************************************************************
 * Local Typedef Declarations                                                  *
@@ -130,65 +132,76 @@ int InitPRU(int pruNum){
 void RGBToPRU(RGB *leds, int length) {
   //ws2812b takes bytes in GRB order
   int i;
-  printf("Copying Memory\r\n");
+  //printf("Copying Memory\r\n");
   pruDataMem_int[0] = length * 3;  
   for (i=0; i<length; i++) {
     pruDataMem_byte[(i*3)] = (char) leds[i].green;
     pruDataMem_byte[(i*3) + 1] = (char) leds[i].red;
     pruDataMem_byte[(i*3) + 2] = (char) leds[i].blue;
   }
-  printf("Memory count: %d\r\n", pruDataMem_int[0]);
+  //printf("Memory count: %d\r\n", pruDataMem_int[0]);
   prussdrv_pru_send_event(PRU_INTERRUPT_1);
-  printf("Done\r\n");
+  //printf("Done\r\n");
 
 }
 
 void WaitForPRU() {
     /* Wait until PRU0 has finished rendering the lights */
-    printf("\tINFO: Waiting for HALT command.\r\n");
+    //printf("\tINFO: Waiting for HALT command.\r\n");
     prussdrv_pru_wait_event (PRU_EVTOUT_0);
-    printf("\tINFO: PRU completed transfer.\r\n");
+    //printf("\tINFO: PRU completed transfer.\r\n");
     prussdrv_pru_clear_event (PRU_EVTOUT_0, PRU0_ARM_INTERRUPT);
+}
+
+LightMode *nextLightMode(int cycleNum, RGB *leds, int numberOfLights) {
+  LightMode* lm;
+  const int num_modes = 3;
+  switch (cycleNum % num_modes) {
+  case 0: lm = new ChristmasTwinkleMode(leds, numberOfLights); break;
+  case 1: lm = new CandleMode(leds, numberOfLights); break;
+  case 2: lm = new MovingCandycaneMode(leds, numberOfLights); break;
+  }
+  return lm;
 }
 
 
 int main (void)
 {
   int ret;
-  RGB leds[LED_COUNT+500];
-  //ChristmasTwinkleMode stuff(leds, LED_COUNT);
-  //SolidMode stuff(leds, LED_COUNT, 5, 5, 5);
-  RainbowMode stuff(leds, LED_COUNT);
+  RGB leds[LED_COUNT];
+  LightMode *currentMode;
+  time_t startTime, currentTime;
+  double elapsedTime;
+  int lightCycle = 0;
+  
   ret = InitPRU(0);
   if (ret) {
     return(ret);
   }
 
 
-
-  while (1) {
-    stuff.cycle();
-    RGBToPRU(leds, LED_COUNT);
-    //sleep(usleep(stuff.delayTime() * 1000));
-    //sleep(1);
-    usleep(stuff.delayTime() * 1000);    
-    WaitForPRU();
+  
+  while (lightCycle < 10) {
+    startTime = time(NULL);
+    currentMode = nextLightMode(lightCycle, leds, LED_COUNT);
+    lightCycle += 1;
+    elapsedTime = difftime(time(NULL), startTime);
+    currentTime = time(NULL);
+    // Just in case the clock has updated ( on a reboot our time may be way off) we don't
+    // want this to go forever so use the elapsed time as a lower bound as well
+    while (elapsedTime < MODE_LENGTH && elapsedTime >= 0) {
+      //while (1) {
+      currentMode->cycle();
+      RGBToPRU(leds, LED_COUNT);
+      usleep(currentMode->delayTime() * 1000);    
+      WaitForPRU();
+      currentTime = time(NULL);
+      elapsedTime = difftime(currentTime, startTime);
+    }
+    delete(currentMode);
   }
 
 
-  stuff.cycle();
-  RGBToPRU(leds, LED_COUNT);
-  WaitForPRU();
-
-    /* Check if example passed */
-    if ( LOCAL_examplePassed(PRU_NUM) )
-    {
-        printf("Example executed succesfully.\r\n");
-    }
-    else
-    {
-        printf("Example failed.\r\n");
-    }
     
     /* Disable PRU and close memory mapping*/
     prussdrv_pru_disable(PRU_NUM); 

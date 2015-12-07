@@ -168,3 +168,24 @@ class LightningMode: public PulseMode {
   RGB* cycle();
   int pulsesLeft;
 };
+
+class MovingColorMode: public LightMode {
+ public:
+  MovingColorMode(RGB *leds, int numberOfLights, RGB firstColor, int firstWidth, RGB secondColor, int secondWidth, int fadeLength, int delay);
+  ~MovingColorMode();
+  RGB* cycle();
+  int delayTime();
+  int state;
+  RGB* leds;
+  RGB firstColor;
+  RGB secondColor;
+  int firstWidth;
+  int secondWidth;
+  int delay;
+};
+
+class MovingCandycaneMode: public MovingColorMode {
+ public:
+  MovingCandycaneMode(RGB *leds, int numberOfLights);
+  ~MovingCandycaneMode();
+};

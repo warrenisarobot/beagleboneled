@@ -250,7 +250,7 @@ ChristmasTwinkleMode::ChristmasTwinkleMode(RGB *leds, int numberOfLights) : Twin
 
 ChristmasTwinkleMode::~ChristmasTwinkleMode() {
   delete this->twinkleLight;
-}
+};
 
 
 RainbowMode::RainbowMode(RGB *leds, int numberOfLights) {
@@ -630,25 +630,46 @@ RGB *LightningMode::cycle() {
   }
 }
 
-/*
-void lightning(int numberOfLights) {
-  int lightningPulses = random(3,6);
-  for (int i=0; i < numberOfLights; i++) {
-    SPI.transfer(0);
-    SPI.transfer(0);
-    SPI.transfer(0);
+
+MovingColorMode::MovingColorMode(RGB *leds, int numberOfLights, RGB firstColor, int firstWidth, RGB secondColor, int secondWidth, int fadeLength, int delay) {
+  this->state = 0;
+  this->leds = leds;
+  this->numberOfLights = numberOfLights;
+  this->firstColor = firstColor;
+  this->secondColor = secondColor;
+  this->firstWidth = firstWidth;
+  this->secondWidth = secondWidth;
+  this->delay = delay;
+};
+
+MovingColorMode::~MovingColorMode() {
+};
+
+RGB *MovingColorMode::cycle() {
+  int startSpot = this->state % (this->firstWidth + this->secondWidth);
+  int position = this->state;
+  for (int i=0; i < this->numberOfLights; i++) {
+    position = (position + 1) % (this->firstWidth + this->secondWidth);
+    if (position <= this->firstWidth) {
+      this->leds[i].red = this->firstColor.red;
+      this->leds[i].green = this->firstColor.green;
+      this->leds[i].blue = this->firstColor.blue;
+    } else {
+      this->leds[i].red = this->secondColor.red;
+      this->leds[i].green = this->secondColor.green;
+      this->leds[i].blue = this->secondColor.blue;
+    }
   }
-  delay(1);
-  for (int i=0; i < lightningPulses; i++) {
-    int peak = random(2,11);
-    pulse(100, 1, peak, 1, 15, 50, 2);
-    delay(random(1,10));
-  }
-  for (int i=0; i < numberOfLights; i++) {
-    SPI.transfer(0);
-    SPI.transfer(0);
-    SPI.transfer(0);
-  }
-  delay(random(900,3000));
+  this->state += 1;
+  return  this->leds;
+};
+
+int MovingColorMode::delayTime() {
+  return this->delay;
 }
-*/
+
+MovingCandycaneMode::MovingCandycaneMode(RGB *leds, int numberOfLights) : MovingColorMode(leds, numberOfLights, RGB(255, 10, 10), 50, RGB(100, 100, 100), 50, 5, 40) {
+}
+
+MovingCandycaneMode::~MovingCandycaneMode() {
+}
