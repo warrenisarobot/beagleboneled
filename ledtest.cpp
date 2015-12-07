@@ -159,7 +159,7 @@ LightMode *nextLightMode(int cycleNum, RGB *leds, int numberOfLights) {
   switch (cycleNum % num_modes) {
   case 0: lm = new MovingCandycaneMode(leds, numberOfLights); break;    
   case 1: lm = new ChristmasTwinkleMode(leds, numberOfLights); break;
-  case 2: lm = new CandleMode(leds, numberOfLights); break;
+  case 2: lm = new WhiteFlickerMode(leds, numberOfLights); break;
   }
   return lm;
 }

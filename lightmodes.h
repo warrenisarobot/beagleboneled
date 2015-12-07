@@ -122,6 +122,12 @@ class CandleMode: public FlickerMode {
   ~CandleMode();
 };
 
+class WhiteFlickerMode: public FlickerMode {
+ public:
+  WhiteFlickerMode(RGB *leds, int numberOfLights);
+  ~WhiteFlickerMode();
+};
+
 
 class DropMode: public LightMode {
  public:

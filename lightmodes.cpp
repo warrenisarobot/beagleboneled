@@ -396,6 +396,17 @@ CandleMode::CandleMode(RGB *leds, int numberOfLights) : FlickerMode(leds, number
 CandleMode::~CandleMode() {
 }
 
+WhiteFlickerMode::WhiteFlickerMode(RGB *leds, int numberOfLights) : FlickerMode(leds, numberOfLights) {
+  for (int i=0; i<this->numberOfLights; i++) {
+    this->originalLights[i].red = 50;
+    this->originalLights[i].green = 50;
+    this->originalLights[i].blue = 50;
+  }
+}
+
+WhiteFlickerMode::~WhiteFlickerMode() {
+}
+
 
 DropMode::DropMode(RGB *leds, int numberOfLights) {
   //position starts at 1 and goes to number of lights + the max drop length
