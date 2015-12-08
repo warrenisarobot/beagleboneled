@@ -197,6 +197,7 @@ TwinkleMode::~TwinkleMode() {
 }
 
 RGB* TwinkleMode::cycle() {
+  RGB twinkleLight;
   for (int i=0; i<numberOfLights; i++) {
     if (this->lightState[i] == 0)
       if (rand() % 300 == 1) this->lightState[i] = 1;
@@ -210,10 +211,12 @@ RGB* TwinkleMode::cycle() {
       if (intensity > 10) {
 	intensity = 20 - intensity;
       }
-      if (this->twinkleLight != NULL )
-	changeBrightness(this->twinkleLight, &this->lights[i], 10, intensity);
-      else
+      this->updateTwinkleLed(i);
+      if (this->twinkleLed != NULL) {
+	changeBrightness(this->twinkleLed, &this->lights[i], 10, intensity);
+      } else {
 	changeBrightness(&this->originalLights[i], &this->lights[i], 10, intensity);
+      }
       if (this->lightState[i] == 20) this->lightState[i] = 0;
       else this->lightState[i]++;
     }
@@ -225,6 +228,9 @@ int TwinkleMode::delayTime() {
   return 10;
 }
 
+void TwinkleMode::updateTwinkleLed(int state) {
+}
+
 
 WhiteTwinkleMode::WhiteTwinkleMode(RGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
   //
@@ -234,12 +240,15 @@ WhiteTwinkleMode::WhiteTwinkleMode(RGB *leds, int numberOfLights) : TwinkleMode(
     this->originalLights[i].green = 10;
     this->originalLights[i].blue = 10;
   }
-  this->twinkleLight = new RGB(10, 10, 10);
+  this->twinkleLed = new RGB(10, 10, 10);
 };
 
 WhiteTwinkleMode::~WhiteTwinkleMode() {
-  delete this->twinkleLight;
+  delete this->twinkleLed;
 };
+
+void WhiteTwinkleMode::updateTwinkleLed(int state) {
+}
 
 ChristmasTwinkleMode::ChristmasTwinkleMode(RGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
   //
@@ -254,17 +263,40 @@ ChristmasTwinkleMode::ChristmasTwinkleMode(RGB *leds, int numberOfLights) : Twin
     }
     this->originalLights[i].blue = 0;
   }
-  //this->twinkleLight = new RGB(10, 10, 10);
-  this->twinkleLight = new RGB;
-  this->twinkleLight->red = 10;
-  this->twinkleLight->green = 10;
-  this->twinkleLight->blue = 10;
+  this->twinkleLed = new RGB(10, 10, 10);  
 };
 
 ChristmasTwinkleMode::~ChristmasTwinkleMode() {
-  delete this->twinkleLight;
+  delete this->twinkleLed;
 };
 
+void ChristmasTwinkleMode::updateTwinkleLed(int state) {
+}
+
+ReverseChristmasTwinkleMode::ReverseChristmasTwinkleMode(RGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
+  //
+  this->numberOfLights = numberOfLights;
+  for (int i=0; i<numberOfLights; i++) {
+    this->originalLights[i].red = 50;
+    this->originalLights[i].green = 50;
+    this->originalLights[i].blue = 50;
+  }
+  this->twinkleLed = new RGB(255, 0, 0);  
+};
+
+ReverseChristmasTwinkleMode::~ReverseChristmasTwinkleMode() {
+  delete this->twinkleLed;
+};
+
+void ReverseChristmasTwinkleMode::updateTwinkleLed(int state) {
+  if (state % 2 == 0) {
+    this->twinkleLed->red = 255;
+    this->twinkleLed->green = 0;
+  } else {
+    this->twinkleLed->red = 0;
+    this->twinkleLed->green = 255;
+  }
+}
 
 RainbowMode::RainbowMode(RGB *leds, int numberOfLights) {
   this->lights = leds;
@@ -701,4 +733,10 @@ MovingCandycaneMode::MovingCandycaneMode(RGB *leds, int numberOfLights) : Moving
 }
 
 MovingCandycaneMode::~MovingCandycaneMode() {
+}
+
+MovingChristmasMode::MovingChristmasMode(RGB *leds, int numberOfLights) : MovingColorMode(leds, numberOfLights, RGB(255, 10, 10), 20, RGB(10, 255, 10), 20, 5, 30) {
+}
+
+MovingChristmasMode::~MovingChristmasMode() {
 }

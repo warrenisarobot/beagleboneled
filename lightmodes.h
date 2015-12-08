@@ -68,7 +68,8 @@ class TwinkleMode: public LightMode {
  public:
   RGB* originalLights;
   int* lightState;
-  RGB* twinkleLight;
+  virtual void updateTwinkleLed(int state);
+  RGB* twinkleLed;
   TwinkleMode(RGB *leds, int numberOfLights);
   //TwinkleMode();
   ~TwinkleMode();
@@ -81,6 +82,7 @@ class WhiteTwinkleMode: public TwinkleMode {
  public:
   WhiteTwinkleMode(RGB *leds, int numberOfLights);
   ~WhiteTwinkleMode();
+  void updateTwinkleLed(int state);
 };
 
 
@@ -88,8 +90,15 @@ class ChristmasTwinkleMode: public TwinkleMode {
  public:
   ChristmasTwinkleMode(RGB *leds, int numberOfLights);
   ~ChristmasTwinkleMode();
+  void updateTwinkleLed(int state);
 };
 
+class ReverseChristmasTwinkleMode: public TwinkleMode {
+ public:
+  ReverseChristmasTwinkleMode(RGB *leds, int numberOfLights);
+  ~ReverseChristmasTwinkleMode();
+  void updateTwinkleLed(int state);
+};
 
 class RainbowMode: public LightMode {
  public:
@@ -195,4 +204,10 @@ class MovingCandycaneMode: public MovingColorMode {
  public:
   MovingCandycaneMode(RGB *leds, int numberOfLights);
   ~MovingCandycaneMode();
+};
+
+class MovingChristmasMode: public MovingColorMode {
+ public:
+  MovingChristmasMode(RGB *leds, int numberOfLights);
+  ~MovingChristmasMode();
 };

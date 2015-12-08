@@ -45,7 +45,7 @@
 //#define PRU_INTERRUPT_1  21
 #define PRU_INTERRUPT_1  22
 #define LED_COUNT        1500
-#define MODE_LENGTH      20
+#define MODE_LENGTH      30
 
 /******************************************************************************
 * Local Typedef Declarations                                                  *
@@ -157,10 +157,10 @@ LightMode *nextLightMode(int cycleNum, RGB *leds, int numberOfLights) {
   LightMode* lm;
   const int num_modes = 4;
   switch (cycleNum % num_modes) {
-  case 0: lm = new MovingChristmasMode(leds, numberOfLights); break;
-  case 1: lm = new ReverseChristmasTwinkleMode(leds, numberOfLights); break;    
-  case 2: lm = new MovingCandycaneMode(leds, numberOfLights); break;
-  case 3: lm = new ChristmasTwinkleMode(leds, numberOfLights); break;
+  case 0: lm = new Movin
+  case 0: lm = new ReverseChristmasTwinkleMode(leds, numberOfLights); break;    
+  case 1: lm = new MovingCandycaneMode(leds, numberOfLights); break;
+  case 2: lm = new WhiteFlickerMode(leds, numberOfLights); break;
   }
   return lm;
 }
