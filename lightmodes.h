@@ -1,4 +1,5 @@
 //#include <FastLED.h>
+#include <vector>
 
 
 class RGB {
@@ -8,8 +9,26 @@ class RGB {
   int blue;
   RGB();
   RGB(int r, int g, int b);
+  void copy(RGB &source);
+  void update(int r, int g, int b);
 };
 
+class SpecklePixel {
+ public:
+  int index;
+  int state;
+  SpecklePixel(int index);
+};
+
+class Ripple {
+ public:
+  Ripple(int r, int g, int b);
+  ~Ripple();
+  RGB baseColor;
+  int state;
+  int done;
+  int cycle(RGB *leds, int index, int numberOfLights);
+};
 
 class LightMode {
  public:
@@ -210,4 +229,36 @@ class MovingChristmasMode: public MovingColorMode {
  public:
   MovingChristmasMode(RGB *leds, int numberOfLights);
   ~MovingChristmasMode();
+};
+
+class RippleMode: public LightMode {
+ public:
+  RippleMode(RGB *leds, int numberOfLights, int rippleOccurance);
+  ~RippleMode();
+  int state;
+  RGB *leds;
+  int numberOfLights;
+  int rippleOccurance;
+  virtual void backgroundRGB(RGB *led);
+  RGB* cycle();
+  int delayTime();
+};
+
+class SpeckleColorMode: public LightMode {
+ public:
+  SpeckleColorMode(RGB *leds, int numberOfLights,  int cyclesToComplete, int solidCycles);
+  ~SpeckleColorMode();
+  int state;
+  int colorCount;
+  RGB *leds;
+  int numberOfLights;
+  int cyclesToComplete;
+  int solidCycles;
+  RGB previousColor;
+  RGB nextColor;
+  std::vector<SpecklePixel> speckleNotStarted;
+  std::vector<SpecklePixel> speckleStarted;
+  virtual void cycleColors();  RGB* cycle();
+  int delayTime();
+  void resetState();
 };
