@@ -155,12 +155,14 @@ void WaitForPRU() {
 
 LightMode *nextLightMode(int cycleNum, RGB *leds, int numberOfLights) {
   LightMode* lm;
-  const int num_modes = 4;
+  const int num_modes = 5;
   switch (cycleNum % num_modes) {
-  case 0: lm = new MovingChristmasMode(leds, numberOfLights); break;
-  case 1: lm = new ReverseChristmasTwinkleMode(leds, numberOfLights); break;    
-  case 2: lm = new MovingCandycaneMode(leds, numberOfLights); break;
-  case 3: lm = new ChristmasTwinkleMode(leds, numberOfLights); break;
+  case 0: lm = new SpeckleMultiColorMode(leds, numberOfLights); break;
+    //case 0: lm = new MovingChristmasMode(leds, numberOfLights); break;
+  case 1: lm = new MovingChristmasMode(leds, numberOfLights); break;
+  case 2: lm = new ReverseChristmasTwinkleMode(leds, numberOfLights); break;    
+  case 3: lm = new MovingCandycaneMode(leds, numberOfLights); break;
+  case 4: lm = new ChristmasTwinkleMode(leds, numberOfLights); break;
   }
   return lm;
 }

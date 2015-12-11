@@ -246,19 +246,27 @@ class RippleMode: public LightMode {
 
 class SpeckleColorMode: public LightMode {
  public:
-  SpeckleColorMode(RGB *leds, int numberOfLights,  int cyclesToComplete, int solidCycles);
+  SpeckleColorMode(RGB *leds, int numberOfLights,  int fadesPerCycle, int solidCycles);
   ~SpeckleColorMode();
   int state;
+  int counter;
   int colorCount;
   RGB *leds;
   int numberOfLights;
-  int cyclesToComplete;
+  int fadesPerCycle;
   int solidCycles;
   RGB previousColor;
   RGB nextColor;
   std::vector<SpecklePixel> speckleNotStarted;
   std::vector<SpecklePixel> speckleStarted;
-  virtual void cycleColors();  RGB* cycle();
-  int delayTime();
+  virtual void cycleColors();
+  RGB* cycle();
+  virtual int delayTime();
   void resetState();
+};
+
+class SpeckleMultiColorMode: public SpeckleColorMode {
+ public:
+  SpeckleMultiColorMode(RGB *leds, int numberOfLights);
+  void cycleColors();
 };

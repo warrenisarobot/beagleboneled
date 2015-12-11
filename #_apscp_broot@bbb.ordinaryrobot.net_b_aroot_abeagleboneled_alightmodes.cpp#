@@ -1,5 +1,6 @@
 #include "lightmodes.h"
 #include <stdlib.h>
+#include <vector>
 
 
 void changeBrightness(RGB *pixelIn, RGB *pixelOut, int steps, int currentStep) {
@@ -44,6 +45,12 @@ void colorMerge(RGB color1, RGB color2, RGB *pixelOut, int steps, int currentSte
   pixelOut->blue = (int) color1.blue + ((color2.blue - color1.blue) * increase);
 }
 
+void copyRGB(RGB *source, RGB *dest) {
+  dest->red = source->red;
+  dest->green = source->green;
+  dest->blue = source->blue;
+}
+
 
 RGB::RGB() {
   this->red = 0;
@@ -57,6 +64,38 @@ RGB::RGB(int r, int g, int b) {
   this->blue = b;
 }
 
+void RGB::copy(RGB &source) {
+  this->red = source.red;
+  this->green = source.green;
+  this->blue = source.blue;
+}
+
+void RGB::update(int r, int g, int b) {
+  this->red = r;
+  this->green = g;
+  this->blue = b;
+}
+
+SpecklePixel::SpecklePixel(int index) {
+  this->index = index;
+  this->state = 0;
+}
+
+Ripple::Ripple(int r, int g, int b) {
+  this->done = 0;
+  this->baseColor = RGB(r, g, b);
+  this->state = 0;
+}
+
+Ripple::~Ripple() {
+  //delete this->baseColor;
+}
+
+int Ripple::cycle(RGB *leds, int index, int numberOfLights) {
+  this->state += 1;
+  if (this->state < 10) {
+  }
+}
 
 RGB* LightMode::cycle() {};
 int LightMode::delayTime() {};
@@ -745,22 +784,71 @@ RippleMode::RippleMode(RGB *leds, int numberOfLights, int rippleOccurance) {
   this->leds = leds;
   this->numberOfLights = numberOfLights;
   this->rippleOccurance = rippleOccurance;
+  this->state = 0;
 }
 
-RippleMode::~RippleMode(RGB *leds, int numberOfLights) {
+RippleMode::~RippleMode() {
 }
 
-void RipppleMode::backgroundRGB(RGB *led) {
+void RippleMode::backgroundRGB(RGB *led) {
   led->red = 10;
   led->green = 10;
   led->blue = 10;
 }
 
 RGB* RippleMode::cycle() {
-  if this
+  this->state += 1;
+  
 }
 
 int RippleMode::delayTime() {
   return 10;
+}
+
+
+SpeckleColorMode::SpeckleColorMode(RGB *leds, int numberOfLights,  int cyclesToComplete, int fadePerCycle) {
+  this->leds = leds;
+  this->numberOfLights = numberOfLights;
+  this->fadePerCycle = fadePerCycle;
+  this->state = 0;
+  this->counter = 0;
+  this->colorCount = 0;
+  this->cycleColors();
+  this->solidCycles = solidCycles;
+  //this->nextColor();
+  //this->previousColor();
+}
+
+SpeckleColorMode::~SpeckleColorMode() {
+}
+
+void SpeckleColorMode::cycleColors() {
+  this->previousColor.copy(this->nextColor);
+  switch (this->colorCount % 3) {
+  case 0: this->nextColor.update(150,0,0); break;
+  case 1: this->nextColor.update(0,150,0); break;
+  case 2: this->nextColor.update(0,0,150); break;
+  }
+}
+
+void SpeckleColorMode::resetState() {
+  this->speckleNotStarted.clear();
+  this->speckleStarted.clear();
+  for (int i; i<this->numberOfLights; i++ ) {
+    this->speckleNotStarted.push_back(SpecklePixel(i));
+  }
+}
+
+RGB* SpeckleColorMode::cycle() {
+  if (this->spstate > this->solidCycles + this->cyclesToComplete) {
+    this->state = 1;
+    this->cycleColors();
+    //now pick the next colors to start fading in
+    for (int i=0; i<this->cyclesToComplete; i++)
+  }
+}
+
+int SpeckleColorMode::delayTime() {
+  return 8;
 }
 
