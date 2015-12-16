@@ -124,8 +124,9 @@ int InitPRU(int pruNum){
     printf("\tINT: Interrupt event %d on channel %d and host interrupt %d\r\n",  PRU_INTERRUPT_1, prussdrv_get_event_to_channel_map(PRU_INTERRUPT_1), prussdrv_get_event_to_host_map(PRU_INTERRUPT_1));
     
     /* Execute example on PRU */
-    printf("\tINFO: Executing example.\r\n");
+    printf("\tINFO: Loading PRU code.\r\n");
     prussdrv_exec_program (PRU_NUM, "./prucode.bin");
+    printf("PRU code finished loading\r\n");
     return (0);
 }
 
@@ -155,14 +156,15 @@ void WaitForPRU() {
 
 LightMode *nextLightMode(int cycleNum, RGB *leds, int numberOfLights) {
   LightMode* lm;
-  const int num_modes = 5;
+  const int num_modes = 6;
   switch (cycleNum % num_modes) {
-  case 0: lm = new SpeckleMultiColorMode(leds, numberOfLights); break;
+  case 0: lm = new SpeckleVioletMode(leds, numberOfLights); break;
     //case 0: lm = new MovingChristmasMode(leds, numberOfLights); break;
   case 1: lm = new MovingChristmasMode(leds, numberOfLights); break;
-  case 2: lm = new ReverseChristmasTwinkleMode(leds, numberOfLights); break;    
-  case 3: lm = new MovingCandycaneMode(leds, numberOfLights); break;
-  case 4: lm = new ChristmasTwinkleMode(leds, numberOfLights); break;
+  case 2: lm = new ReverseChristmasTwinkleMode(leds, numberOfLights); break;
+  case 3: lm = new SpeckleCyanYellowMode(leds, numberOfLights); break;
+  case 4: lm = new MovingCandycaneMode(leds, numberOfLights); break;
+  case 5: lm = new ChristmasTwinkleMode(leds, numberOfLights); break;
   }
   return lm;
 }
@@ -176,50 +178,66 @@ int main (void)
   time_t startTime, currentTime;
   double elapsedTime;
   int lightCycle = 0;
-  struct tm *tmCurrentTime = NULL;
-  int lightsOn = -1;
+  tm *tmCurrentTime;
+  int lightsRunning = -1;
   
   ret = InitPRU(0);
   if (ret) {
+    printf("Error initializing PRU, cannot continue.  Code: %d", ret);
     return(ret);
   }
 
-  time(&currentTime);
 
-  if (tmCurrentTime != NULL) delete (tmCurrentTime);
+  time(&currentTime);
   tmCurrentTime = localtime(&currentTime);
-  
-  while ((tmCurrentTime->tm_hour >= 17) && (tmCurrentTime->tm_hour <= 23 || (tmCurrentTime->tm_hour == 23 && tmCurrentTime->tm_min <= 30))) {
-    if (lightsOn != 1) {
-      std::cout << "Starting lights at " << tmCurrentTime->tm_hour << ":" << tmCurrentTime->tm_min << "\r\n";
-      lightsOn = 1;
+  std::cout << "Starting LED service at " << tmCurrentTime->tm_hour << ":" << tmCurrentTime->tm_min << "\r\n";
+  //we're only running the lights from 5:00pm to 11:45
+  while(1) {
+    //while ((tmCurrentTime->tm_hour >= 17 && tmCurrentTime->tm_min >= 00) && (tmCurrentTime->tm_hour <= 23 || (tmCurrentTime->tm_hour == 23 && tmCurrentTime->tm_min <= 30)) ) {
+    while(1) {
+      if (lightsRunning != 1) {
+	std::cout << "Turning lights on at " << tmCurrentTime->tm_hour << ":" << tmCurrentTime->tm_min << "\r\n";
+	lightsRunning = 1;
+      }
+      currentMode = nextLightMode(lightCycle, leds, LED_COUNT);
+      std::cout << "cycled\r\n";
+      lightCycle += 1;
+      elapsedTime = difftime(time(NULL), startTime);
+      currentTime = time(NULL);
+      // Just in case the clock has updated ( on a reboot our time may be way off) we don't
+      // want this to go forever so use the elapsed time as a lower bound as well
+      while (elapsedTime < MODE_LENGTH && elapsedTime >= 0) {
+	//while (1) {
+	currentMode->cycle();
+	RGBToPRU(leds, LED_COUNT);
+	usleep(currentMode->delayTime() * 1000);    
+	WaitForPRU();
+	currentTime = time(NULL);
+	elapsedTime = difftime(currentTime, startTime);
+      }
+      delete(currentMode);
     }
-    startTime = time(NULL);
-    currentMode = nextLightMode(lightCycle, leds, LED_COUNT);
-    lightCycle += 1;
-    elapsedTime = difftime(time(NULL), startTime);
-    time(&currentTime);
-    // Just in case the clock has updated ( on a reboot our time may be way off) we don't
-    // want this to go forever so use the elapsed time as a lower bound as well
-    while (elapsedTime < MODE_LENGTH && elapsedTime >= 0) {
-      //while (1) {
+    if (lightsRunning != 0) {
+      std::cout << "Turning lights off at " << tmCurrentTime->tm_hour << ":" << tmCurrentTime->tm_min << "\r\n";
+      currentMode = new SolidMode(leds, LED_COUNT, 0, 0, 0);
       currentMode->cycle();
       RGBToPRU(leds, LED_COUNT);
-      usleep(currentMode->delayTime() * 1000);    
       WaitForPRU();
-      time(&currentTime);
-      elapsedTime = difftime(currentTime, startTime);
+      lightsRunning = 0;
+      delete(currentMode);
     }
-    delete(currentMode);
+    sleep(60);
+    currentTime = time(&currentTime);
+    tmCurrentTime = localtime(&currentTime);
   }
 
 
     
     /* Disable PRU and close memory mapping*/
-    prussdrv_pru_disable(PRU_NUM); 
-    prussdrv_exit ();
-
-    return(0);
+  prussdrv_pru_disable(PRU_NUM); 
+  prussdrv_exit ();
+  
+  return(0);
 }
 
 /*****************************************************************************
