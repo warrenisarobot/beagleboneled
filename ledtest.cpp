@@ -183,43 +183,54 @@ int main (void)
   if (ret) {
     return(ret);
   }
-
-  time(&currentTime);
-
-  if (tmCurrentTime != NULL) delete (tmCurrentTime);
-  tmCurrentTime = localtime(&currentTime);
-  
-  while ((tmCurrentTime->tm_hour >= 17) && (tmCurrentTime->tm_hour <= 23 || (tmCurrentTime->tm_hour == 23 && tmCurrentTime->tm_min <= 30))) {
-    if (lightsOn != 1) {
-      std::cout << "Starting lights at " << tmCurrentTime->tm_hour << ":" << tmCurrentTime->tm_min << "\r\n";
-      lightsOn = 1;
-    }
-    startTime = time(NULL);
-    currentMode = nextLightMode(lightCycle, leds, LED_COUNT);
-    lightCycle += 1;
-    elapsedTime = difftime(time(NULL), startTime);
+  while (1) {
     time(&currentTime);
-    // Just in case the clock has updated ( on a reboot our time may be way off) we don't
-    // want this to go forever so use the elapsed time as a lower bound as well
-    while (elapsedTime < MODE_LENGTH && elapsedTime >= 0) {
-      //while (1) {
+    tmCurrentTime = localtime(&currentTime);
+  
+    while ((tmCurrentTime->tm_hour >= 17) && (tmCurrentTime->tm_hour <= 23 || (tmCurrentTime->tm_hour == 23 && tmCurrentTime->tm_min <= 30))) {
+      if (lightsOn != 1) {
+	std::cout << "Starting lights at " << tmCurrentTime->tm_hour << ":" << tmCurrentTime->tm_min << "\r\n";
+	lightsOn = 1;
+      }
+      startTime = time(NULL);
+      currentMode = nextLightMode(lightCycle, leds, LED_COUNT);
+      lightCycle += 1;
+      elapsedTime = difftime(time(NULL), startTime);
+
+      // Just in case the clock has updated ( on a reboot our time may be way off) we don't
+      // want this to go forever so use the elapsed time as a lower bound as well
+      while (elapsedTime < MODE_LENGTH && elapsedTime >= 0) {
+	//while (1) {
+	currentMode->cycle();
+	RGBToPRU(leds, LED_COUNT);
+	usleep(currentMode->delayTime() * 1000);    
+	WaitForPRU();
+	time(&currentTime);
+	elapsedTime = difftime(currentTime, startTime);
+      }
+      delete(currentMode);
+    }
+    if (lightsOn != 0) {
+      std::cout << "Shutting lights off at " << tmCurrentTime->tm_hour << ":" << tmCurrentTime->tm_min << "\r\n";
+      lightsOn = 0;
+      currentMode = new SolidMode(leds, LED_COUNT, 0, 0, 0);
       currentMode->cycle();
       RGBToPRU(leds, LED_COUNT);
-      usleep(currentMode->delayTime() * 1000);    
+      sleep(1);
       WaitForPRU();
-      time(&currentTime);
-      elapsedTime = difftime(currentTime, startTime);
     }
-    delete(currentMode);
+    sleep(10);
+    time(&currentTime);
+    tmCurrentTime = localtime(&currentTime);
   }
 
 
     
-    /* Disable PRU and close memory mapping*/
-    prussdrv_pru_disable(PRU_NUM); 
-    prussdrv_exit ();
+  /* Disable PRU and close memory mapping*/
+  prussdrv_pru_disable(PRU_NUM); 
+  prussdrv_exit ();
 
-    return(0);
+  return(0);
 }
 
 /*****************************************************************************
