@@ -22,12 +22,13 @@ class SpecklePixel {
 
 class Ripple {
  public:
-  Ripple(int r, int g, int b);
+  Ripple(int r, int g, int b, int position);
   ~Ripple();
   RGB baseColor;
   int state;
   int done;
-  int cycle(RGB *leds, int index, int numberOfLights);
+  int position;
+  int cycle(RGB *leds, int numberOfLights);
 };
 
 class LightMode {
@@ -239,9 +240,12 @@ class RippleMode: public LightMode {
   RGB *leds;
   int numberOfLights;
   int rippleOccurance;
-  virtual void backgroundRGB(RGB *led);
+  int position;
+  virtual void backgroundRGB(RGB *led, int index);
+  virtual void newRipple();
   RGB* cycle();
   int delayTime();
+  std::vector<Ripple> ripples;
 };
 
 class SpeckleColorMode: public LightMode {

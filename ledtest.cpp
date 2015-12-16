@@ -158,7 +158,7 @@ LightMode *nextLightMode(int cycleNum, RGB *leds, int numberOfLights) {
   const int num_modes = 5;
   switch (cycleNum % num_modes) {
   case 0: lm = new SpeckleMultiColorMode(leds, numberOfLights); break;
-    //case 0: lm = new MovingChristmasMode(leds, numberOfLights); break;
+    //case 0: lm = new RippleMode(leds, numberOfLights, 30); break;
   case 1: lm = new MovingChristmasMode(leds, numberOfLights); break;
   case 2: lm = new ReverseChristmasTwinkleMode(leds, numberOfLights); break;    
   case 3: lm = new MovingCandycaneMode(leds, numberOfLights); break;
@@ -187,7 +187,7 @@ int main (void)
     time(&currentTime);
     tmCurrentTime = localtime(&currentTime);
   
-    while ((tmCurrentTime->tm_hour >= 17) && (tmCurrentTime->tm_hour <= 23 || (tmCurrentTime->tm_hour == 23 && tmCurrentTime->tm_min <= 30))) {
+    while ((tmCurrentTime->tm_hour >= 17) && (tmCurrentTime->tm_hour < 23 || (tmCurrentTime->tm_hour == 23 && tmCurrentTime->tm_min <= 30))) {
       if (lightsOn != 1) {
 	std::cout << "Starting lights at " << tmCurrentTime->tm_hour << ":" << tmCurrentTime->tm_min << "\r\n";
 	lightsOn = 1;
