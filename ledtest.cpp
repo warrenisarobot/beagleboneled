@@ -209,6 +209,7 @@ int main (void)
 	elapsedTime = difftime(currentTime, startTime);
       }
       delete(currentMode);
+      tmCurrentTime = localtime(&currentTime);
     }
     if (lightsOn != 0) {
       std::cout << "Shutting lights off at " << tmCurrentTime->tm_hour << ":" << tmCurrentTime->tm_min << "\r\n";
