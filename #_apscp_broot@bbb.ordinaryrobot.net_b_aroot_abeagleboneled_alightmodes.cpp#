@@ -1,7 +1,7 @@
 #include "lightmodes.h"
 #include <stdlib.h>
 #include <iostream>
-#include <math>
+#include <cmath>
 
 
 void changeBrightness(RGB *pixelIn, RGB *pixelOut, int steps, int currentStep) {
@@ -25,12 +25,13 @@ void changeBrightness(RGB *pixelIn, RGB *pixelOut, int steps, int currentStep) {
   //(255 - biggest) / 10 = 5
   //205 * x = 205 + 5 = 210
   //scaling factor = next_step / biggest
-  float step = difference / steps;
+  float step = (float) difference / steps;
   float intensity_scale = (scaleMe + (step * currentStep)) / scaleMe;
   int temp;
   pixelOut->red = pixelIn->red * intensity_scale;
   pixelOut->green = pixelIn->green * intensity_scale;
   pixelOut->blue = pixelIn->blue * intensity_scale;
+  std::cout << "changeBrightness(" << currentStep << "/" << steps << ")  RGB(" << pixelIn->red << "," << pixelIn->green << "," << pixelIn->blue << ") -> RGB(" << pixelOut->red << "," 
 }
 
 
@@ -82,26 +83,40 @@ SpecklePixel::SpecklePixel(int index) {
   this->state = 0;
 }
 
-Ripple::Ripple(int r, int g, int b) {
+Ripple::Ripple(int r, int g, int b, int position) {
   this->done = 0;
   this->baseColor = RGB(r, g, b);
   this->state = 0;
-  this->position = 0;
+  this->position = position;
 }
 
 Ripple::~Ripple() {
   //delete this->baseColor;
 }
 
-int Ripple::cycle(RGB *leds, int index, int numberOfLights) {
+int Ripple::cycle(RGB *leds, int numberOfLights) {
   int length = 0;
-  RGB temp();
+  RGB temp(0, 0, 0);
   this->state += 1;
-  length = math::log((float) this->state + 2);
-  if (this->state < 30) {
+  length = log((float) this->state + 2);
+  if (this->state < 120) {
     for (int i=0; i<length; i++) {
-      changeBrightness(thin, out, 15, 15-i);
+      if (this->state < 60) changeBrightness(&this->baseColor, &temp, 15, 15-i);
+      else changeBrightness(&this->baseColor, &temp, 15, 15 - i - ((this->state-60) / 10 ));
+      std::cout << "position: " << this->position << ", index: " << i << ", ledsize: " << numberOfLights << "(" << temp.red << "," << temp.green << "," << temp.blue << ")\r\n";
+      if ((this->position + i) < numberOfLights ) {
+	leds[this->position + i].red = temp.red;
+	leds[this->position + i].green = temp.green;
+	leds[this->position + i].blue = temp.blue;
+      }
+      if ((this->position - 1) >= 0) {
+	leds[this->position - i].red = temp.red;
+	leds[this->position - i].green = temp.green;
+	leds[this->position - i].blue = temp.blue;
+      }
     }
+  } else {
+    this->done = 1;
   }
 }
 
@@ -796,17 +811,46 @@ RippleMode::RippleMode(RGB *leds, int numberOfLights, int rippleOccurance) {
 }
 
 RippleMode::~RippleMode() {
+  this->ripples.clear();
 }
 
-void RippleMode::backgroundRGB(RGB *led) {
+void RippleMode::backgroundRGB(RGB *led, int index) {
   led->red = 10;
   led->green = 10;
   led->blue = 10;
 }
 
+void RippleMode::newRipple() {
+  int red, green, blue;
+  switch(this->state % 6) {
+  case 0: red = 250; green = 0; blue=0; break;
+  case 1: red = 150; green = 150; blue=0; break;
+  case 2: red = 0; green = 250; blue=0; break;
+  case 3: red = 0; green = 150; blue=150; break;
+  case 4: red = 0; green = 0; blue=250; break;
+  case 5: red = 150; green = 0; blue=150; break;
+  }
+  this->ripples.push_back(Ripple(red, green, blue, rand() % this->numberOfLights));
+}
+
 RGB* RippleMode::cycle() {
   this->state += 1;
-  
+  if (rand() % 100 <= this->rippleOccurance) {
+    this->newRipple();
+  }
+  for (int i=0; i< this->numberOfLights; i++) {
+    this->backgroundRGB(&this->leds[i], i);
+  }
+  for (int i=(int) this->ripples.size()-1; i >= 0; i-- ) {
+    if (this->ripples[i].done) {
+      this->ripples.erase(this->ripples.begin() + i);
+      std::cout << "removing ripple " << i << "/" << this->ripples.size() << "\r\n";
+    } else {
+      std::cout << "cycling ripple " << i << "/" << this->ripples.size() << " at " << this->ripples[i].position << "\r\n";
+      this->ripples[i].cycle(this->leds, this->numberOfLights);
+    }
+  }
+  return this->leds;
 }
 
 int RippleMode::delayTime() {

@@ -172,6 +172,7 @@ int main (void)
 {
   int ret;
   RGB leds[LED_COUNT];
+  RGB transformed_leds[LED_COUNT];
   LightMode *currentMode;
   time_t startTime, currentTime;
   double elapsedTime;
@@ -202,14 +203,23 @@ int main (void)
       while (elapsedTime < MODE_LENGTH && elapsedTime >= 0) {
 	//while (1) {
 	currentMode->cycle();
-	RGBToPRU(leds, LED_COUNT);
+	//we want our neighbors to still like us, so dim the lights later in the evening
+	if (tmCurrentTime->tm_hour >= 21) {
+	  for (int i=0; i<LED_COUNT; i++) {
+	    changeBrightness(&leds[i], &transformed_leds[i], 10, -8);
+	  }
+	  //std::cout << "DImmed " << LED_COUNT << " lights\r\n";
+	  RGBToPRU(transformed_leds, LED_COUNT);
+	} else {
+	  RGBToPRU(leds, LED_COUNT);
+	}
 	usleep(currentMode->delayTime() * 1000);    
 	WaitForPRU();
 	time(&currentTime);
 	elapsedTime = difftime(currentTime, startTime);
       }
+      tmCurrentTime = localtime(&currentTime);      
       delete(currentMode);
-      tmCurrentTime = localtime(&currentTime);
     }
     if (lightsOn != 0) {
       std::cout << "Shutting lights off at " << tmCurrentTime->tm_hour << ":" << tmCurrentTime->tm_min << "\r\n";
