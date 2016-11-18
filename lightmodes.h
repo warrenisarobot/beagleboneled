@@ -105,6 +105,12 @@ class WhiteTwinkleMode: public TwinkleMode {
   void updateTwinkleLed(int state);
 };
 
+class ThanksgivingTwinkleMode: public TwinkleMode {
+ public:
+  ThanksgivingTwinkleMode(RGB *leds, int numberOfLights);
+  ~ThanksgivingTwinkleMode();
+  void updateTwinkleLed(int state);
+};
 
 class ChristmasTwinkleMode: public TwinkleMode {
  public:
@@ -272,5 +278,11 @@ class SpeckleColorMode: public LightMode {
 class SpeckleMultiColorMode: public SpeckleColorMode {
  public:
   SpeckleMultiColorMode(RGB *leds, int numberOfLights);
+  void cycleColors();
+};
+
+class SpeckleThanksgivingColorMode: public SpeckleColorMode {
+ public:
+  SpeckleThanksgivingColorMode(RGB *leds, int numberOfLights);
   void cycleColors();
 };

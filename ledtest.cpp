@@ -45,7 +45,8 @@
 //#define PRU_INTERRUPT_1  21
 #define PRU_INTERRUPT_1  22
 #define LED_COUNT        1500
-#define MODE_LENGTH      20
+#define MODE_LENGTH      40
+//#define MODE_LENGTH      20
 
 /******************************************************************************
 * Local Typedef Declarations                                                  *
@@ -167,6 +168,18 @@ LightMode *nextLightMode(int cycleNum, RGB *leds, int numberOfLights) {
   return lm;
 }
 
+LightMode *nextThanksgivingLightMode(int cycleNum, RGB *leds, int numberOfLights) {
+  LightMode* lm;
+  const int num_modes = 4;
+  switch (cycleNum % num_modes) {
+  case 0: lm = new SpeckleThanksgivingColorMode(leds, numberOfLights); break;
+  case 1: lm = new ThanksgivingTwinkleMode(leds, numberOfLights); break;    
+  case 2: lm = new SpeckleThanksgivingColorMode(leds, numberOfLights); break;
+  case 3: lm = new WhiteTwinkleMode(leds, numberOfLights); break;
+  }
+  return lm;
+}
+
 
 int main (void)
 {
@@ -194,7 +207,7 @@ int main (void)
 	lightsOn = 1;
       }
       startTime = time(NULL);
-      currentMode = nextLightMode(lightCycle, leds, LED_COUNT);
+      currentMode = nextThanksgivingLightMode(lightCycle, leds, LED_COUNT);
       lightCycle += 1;
       elapsedTime = difftime(time(NULL), startTime);
 
@@ -206,7 +219,7 @@ int main (void)
 	//we want our neighbors to still like us, so dim the lights later in the evening
 	if (tmCurrentTime->tm_hour >= 21) {
 	  for (int i=0; i<LED_COUNT; i++) {
-	    changeBrightness(&leds[i], &transformed_leds[i], 10, -8);
+	    changeBrightness(&leds[i], &transformed_leds[i], 10, -5);
 	  }
 	  //std::cout << "DImmed " << LED_COUNT << " lights\r\n";
 	  RGBToPRU(transformed_leds, LED_COUNT);

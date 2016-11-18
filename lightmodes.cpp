@@ -320,6 +320,25 @@ WhiteTwinkleMode::~WhiteTwinkleMode() {
 void WhiteTwinkleMode::updateTwinkleLed(int state) {
 }
 
+ThanksgivingTwinkleMode::ThanksgivingTwinkleMode(RGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
+  //
+  this->numberOfLights = numberOfLights;
+  for (int i=0; i<numberOfLights; i++) {
+    this->originalLights[i].red = 50;
+    this->originalLights[i].green = 50;
+    this->originalLights[i].blue = 0;
+  }
+  this->twinkleLed = new RGB(50, 0, 0);
+};
+
+ThanksgivingTwinkleMode::~ThanksgivingTwinkleMode() {
+  delete this->twinkleLed;
+};
+
+void ThanksgivingTwinkleMode::updateTwinkleLed(int state) {
+}
+
+
 ChristmasTwinkleMode::ChristmasTwinkleMode(RGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
   //
   this->numberOfLights = numberOfLights;
@@ -949,6 +968,22 @@ void SpeckleMultiColorMode::cycleColors() {
   case 3: this->nextColor.update(150,0,150); break;
   case 4: this->nextColor.update(200,0,0); break;
   case 5: this->nextColor.update(0,200,0); break;
+  }
+  this->colorCount += 1;
+}
+
+
+SpeckleThanksgivingColorMode::SpeckleThanksgivingColorMode(RGB *leds, int numberOfLights) : SpeckleColorMode(leds, numberOfLights, 25, 250) {
+}
+
+void SpeckleThanksgivingColorMode::cycleColors() {
+  this->previousColor.copy(this->nextColor);
+  switch (this->colorCount % 4) {
+    //orange, yellow, red, white
+  case 0: this->nextColor.update(150, 100,0); break;
+  case 1: this->nextColor.update(150,150,0); break;
+  case 2: this->nextColor.update(150,0,0); break;
+  case 3: this->nextColor.update(150,150,150); break;
   }
   this->colorCount += 1;
 }

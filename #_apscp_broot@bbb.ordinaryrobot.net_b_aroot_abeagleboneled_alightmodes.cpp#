@@ -7,31 +7,39 @@
 void changeBrightness(RGB *pixelIn, RGB *pixelOut, int steps, int currentStep) {
   int scaleMe;
   int difference;
-  if (currentStep > 0) {
-    scaleMe = pixelIn->red;
-    if (pixelIn->green > scaleMe) scaleMe = pixelIn->green;
-    if (pixelIn->blue > scaleMe) scaleMe = pixelIn->blue;
-    difference = 255-scaleMe;
+  float step;
+  float intensity_scale;
+  //std::cout << "RGB(" << pixelIn->red << "," << pixelIn->green << "," << pixelIn->blue;
+  if (currentStep >= 0) {
+    if (currentStep > 0) {
+      scaleMe = pixelIn->red;
+      if (pixelIn->green > scaleMe) scaleMe = pixelIn->green;
+      if (pixelIn->blue > scaleMe) scaleMe = pixelIn->blue;
+      difference = 255-scaleMe;
+    } else {
+      scaleMe = 255;
+      if (pixelIn->red != 0 && pixelIn->red < scaleMe) scaleMe = pixelIn->red;
+      if (pixelIn->green != 0 && pixelIn->green < scaleMe) scaleMe = pixelIn->green;
+      if (pixelIn->blue != 0 && pixelIn->blue < scaleMe) scaleMe = pixelIn->blue;
+      difference = scaleMe;
+    }
+    //intensity * scale * originalcolor
+    //I want biggest to max out out at 255
+    //if biggetst is 205 and 10 steps to get to 255 then it is 5 each step
+    //(255 - biggest) / 10 = 5
+    //205 * x = 205 + 5 = 210
+    //scaling factor = next_step / biggest
+    step = (float) difference / steps;
+    intensity_scale = (scaleMe + (step * currentStep)) / scaleMe;
   } else {
-    scaleMe = 255;
-    if (pixelIn->red != 0 && pixelIn->red < scaleMe) scaleMe = pixelIn->red;
-    if (pixelIn->green != 0 && pixelIn->green < scaleMe) scaleMe = pixelIn->green;
-    if (pixelIn->blue != 0 && pixelIn->blue < scaleMe) scaleMe = pixelIn->blue;
-    difference = scaleMe;
+    //we are dimming, this is just the ratio of the current step to total steps (if the
+    //currentStep is negative steps then we are fully dimmed)
+    intensity_scale = (float)(steps - (-1 * currentStep)) / steps;
   }
-  //intensity * scale * originalcolor
-  //I want biggest to max out out at 255
-  //if biggetst is 205 and 10 steps to get to 255 then it is 5 each step
-  //(255 - biggest) / 10 = 5
-  //205 * x = 205 + 5 = 210
-  //scaling factor = next_step / biggest
-  float step = (float) difference / steps;
-  float intensity_scale = (scaleMe + (step * currentStep)) / scaleMe;
-  int temp;
   pixelOut->red = pixelIn->red * intensity_scale;
   pixelOut->green = pixelIn->green * intensity_scale;
   pixelOut->blue = pixelIn->blue * intensity_scale;
-  std::cout << "changeBrightness(" << currentStep << "/" << steps << ")  RGB(" << pixelIn->red << "," << pixelIn->green << "," << pixelIn->blue << ") -> RGB(" << pixelOut->red << "," 
+  //std::cout << "changeBrightness(" << currentStep << "/" << steps << ")  -> RGB(" << pixelOut->red << "," << pixelOut->green << "," << pixelOut->blue << ") step=" << step << ", intensity_scale=" << intensity_scale << " " << pixelIn->red * intensity_scale << ", steps=" << steps << ", difference=" << difference << "\r\n" ;
 }
 
 
@@ -311,6 +319,25 @@ WhiteTwinkleMode::~WhiteTwinkleMode() {
 
 void WhiteTwinkleMode::updateTwinkleLed(int state) {
 }
+
+ThanksgivingTwinkleMode::ThanksgivingTwinkleMode(RGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
+  //
+  this->numberOfLights = numberOfLights;
+  for (int i=0; i<numberOfLights; i++) {
+    this->originalLights[i].red = 75;
+    this->originalLights[i].green = 75;
+    this->originalLights[i].blue = 0;
+  }
+  this->twinkleLed = new RGB(75, 0, 0);
+};
+
+ThanksgivingTwinkleMode::~ThanksgivingTwinkleMode() {
+  delete this->twinkleLed;
+};
+
+void ThanksgivingTwinkleMode::updateTwinkleLed(int state) {
+}
+
 
 ChristmasTwinkleMode::ChristmasTwinkleMode(RGB *leds, int numberOfLights) : TwinkleMode(leds, numberOfLights) {
   //
@@ -941,6 +968,22 @@ void SpeckleMultiColorMode::cycleColors() {
   case 3: this->nextColor.update(150,0,150); break;
   case 4: this->nextColor.update(200,0,0); break;
   case 5: this->nextColor.update(0,200,0); break;
+  }
+  this->colorCount += 1;
+}
+
+
+SpeckleThanksgivingColorMode::SpeckleThanksgivingColorMode(RGB *leds, int numberOfLights) : SpeckleColorMode(leds, numberOfLights, 25, 250) {
+}
+
+void SpeckleThanksgivingColorMode::cycleColors() {
+  this->previousColor.copy(this->nextColor);
+  switch (this->colorCount % 4) {
+    //orange, yellow, red, white
+  case 0: this->nextColor.update(150, 100,0); break;
+  case 1: this->nextColor.update(150,150,0); break;
+  case 2: this->nextColor.update(150,0,0); break;
+  case 3: this->nextColor.update(150,150,150); break;
   }
   this->colorCount += 1;
 }
